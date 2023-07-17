@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.InMemoryService;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -11,11 +12,17 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
 @Slf4j
-public class FilmService {
+public class InMemoryFilmService {
     private final FilmStorage filmStorage;
-    private final UserService userService;
+    private final InMemoryUserService userService;
+
+    @Autowired
+    public InMemoryFilmService(@Qualifier("inMemoryFilmStorage") FilmStorage filmStorage,
+                               InMemoryUserService userService) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+    }
 
     public Film create(Film film) {
         log.info("Film {} has been CREATED", film);

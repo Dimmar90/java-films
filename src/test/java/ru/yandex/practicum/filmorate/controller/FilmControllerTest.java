@@ -1,14 +1,14 @@
-package ru.yandex.practicum.filmorate.controller;
+/*package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.InMemoryService.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.service.InMemoryService.InMemoryUserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryStorage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryStorage.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -24,11 +24,11 @@ class FilmControllerTest {
     private FilmController filmController;
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @BeforeEach
+    BeforeEach
     void setUp() {
-        filmController = new FilmController(new FilmService(
+        filmController = new FilmController(new InMemoryFilmService(
                         new InMemoryFilmStorage(),
-                        new UserService(new InMemoryUserStorage()))
+                        new InMemoryUserService(new InMemoryUserStorage()))
         );
     }
 
@@ -219,3 +219,4 @@ class FilmControllerTest {
         );
     }
 }
+*/

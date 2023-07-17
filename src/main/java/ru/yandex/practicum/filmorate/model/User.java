@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -18,15 +19,17 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
     private Integer id;
-    @Email(message = "Некорректный формат электронной почты")
-    @NotBlank(message = "Электронная почта должна быть заполнена")
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email must be completed")
     private String email;
-    @NotBlank(message = "Логин должен быть заполнен")
+    @NotBlank(message = "Login must be completed")
     private String login;
     private String name;
-    @PastOrPresent(message = "Дата рождения не может быть в будущем")
+    @NotNull(message = "The birthday can't be empty")
+    @PastOrPresent(message = "Birthdate cannot be in the future")
     private LocalDate birthday;
     @Setter(AccessLevel.NONE)
     private Set<Integer> friends = new HashSet<>();

@@ -1,14 +1,13 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.InMemoryStorage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
-@Slf4j
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Integer, Film> films = new HashMap<>();
     private Integer filmId = 1;
@@ -32,15 +31,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film getById(Integer id) {
+        return films.get(id);
+    }
+
+    @Override
     public List<Film> getTopFilms(Integer count) {
         return getFilms().stream()
                 .sorted(Collections.reverseOrder(Comparator.comparingInt(film -> film.getLikes().size())))
                 .limit(count)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Film getById(Integer id) {
-        return films.get(id);
     }
 }

@@ -11,7 +11,7 @@ public interface FilmStorage {
 
     List<Film> getFilms();
 
-    List<Film> getTopFilms(Integer count);
-
     Film getById(Integer id);
+
+    List<Film> getTopFilms(Integer count);
 }
