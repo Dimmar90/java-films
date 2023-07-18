@@ -8,7 +8,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.FriendDaoImpl;
 
@@ -17,6 +20,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +38,7 @@ class UserDaoImplTest {
     private User user;
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
+    private final FilmDao filmStorage;
 
     @BeforeEach
     void setUp() {
@@ -228,5 +233,64 @@ class UserDaoImplTest {
         assertThat(expectedUsers).hasSize(1).contains(user);
         userStorage.deleteUserById(user.getId());
         assertThat(userStorage.getUsers()).hasSize(0);
+    }
+
+    @Test
+    void recomendatedFilmsForUser() {
+
+        userStorage.createUser(User.builder()
+                .email("user1@gmail.com")
+                .login("user1")
+                .name("user1 name")
+                .birthday(LocalDate.of(1980, 5, 25))
+                .build());
+
+        userStorage.createUser(User.builder()
+                .email("user2@gmail.com")
+                .login("user2")
+                .name("userName")
+                .birthday(LocalDate.of(1995, 7, 25))
+                .build()
+        );
+        userStorage.createUser(User.builder()
+                .email("user3@gmail.com")
+                .login("user3")
+                .name("userName")
+                .birthday(LocalDate.of(1989, 4, 15))
+                .build()
+        );
+        List<User> users = userStorage.getUsers();
+
+        Film film1 = filmStorage.createFilm(Film.builder()
+                .name("some film")
+                .description("description some film")
+                .duration(180)
+                .releaseDate(LocalDate.of(2005, 6, 5))
+                .mpa(new Mpa(1, "G"))
+                .genres(new HashSet<>())
+                .build());
+
+        Film film2 = filmStorage.createFilm(
+                Film.builder()
+                        .name("some newFilm")
+                        .description("new description some film")
+                        .duration(150)
+                        .releaseDate(LocalDate.of(2001, 3, 8))
+                        .mpa(new Mpa(1, "G"))
+                        .genres(new HashSet<>())
+                        .build()
+        );
+
+        Film film3 = filmStorage.createFilm(
+                Film.builder()
+                        .name("some WONDERFULLFilm")
+                        .description("NEWNEW description some film")
+                        .duration(1000)
+                        .releaseDate(LocalDate.of(2000, 1, 5))
+                        .mpa(new Mpa(1, "G"))
+                        .genres(new HashSet<>())
+                        .build()
+        );
+        List<Film> films =filmStorage.getFilms();
     }
 }
