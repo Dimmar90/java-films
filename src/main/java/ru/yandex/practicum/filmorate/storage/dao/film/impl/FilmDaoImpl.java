@@ -89,6 +89,11 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public void deleteFilmById(Integer filmId) {
+        jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
+    }
+
+    @Override
     public boolean checkFilmExist(Integer id) {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);

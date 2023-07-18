@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -216,5 +217,16 @@ class UserDaoImplTest {
         friendStorage.addFriend(user.getId(), newUser2.getId());
 
         assertEquals(List.of(newUser1, newUser2), friendStorage.getAllFriends(user.getId()));
+    }
+
+    @Test
+    void shouldDeleteUserById() {
+        userStorage.createUser(user);
+        List<User> expectedUsers = userStorage.getUsers();
+        user.setId(1);
+
+        assertThat(expectedUsers).hasSize(1).contains(user);
+        userStorage.deleteUserById(user.getId());
+        assertThat(userStorage.getUsers()).hasSize(0);
     }
 }
