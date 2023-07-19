@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.storage.dao.user;
 
 import ru.yandex.practicum.filmorate.model.Event;
 
-import java.util.TreeSet;
+import java.util.List;
 
 public interface EventDao {
-    void addEvent(Integer userId, String object, Integer entityId);
+    void addEvent(Integer userId, String eventType, String operation, Integer entityId);
 
-    TreeSet<Event> getEventFeed(Integer userId);
+    List<Event> getEventFeed(Integer userId);
 }

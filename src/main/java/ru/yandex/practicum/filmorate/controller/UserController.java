@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import org.w3c.dom.events.Event;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.DBFilmService;
 import ru.yandex.practicum.filmorate.service.DBUserService;
@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public TreeSet<Event> getEventFeed(@PathVariable("id") Integer userId) {
+    public List<Event> getEventFeed(@PathVariable("id") Integer userId) {
         return userService.getEventFeed(userId);
     }
 }

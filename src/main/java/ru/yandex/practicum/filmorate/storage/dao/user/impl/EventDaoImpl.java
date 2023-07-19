@@ -10,7 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -18,26 +19,22 @@ public class EventDaoImpl implements EventDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void addEvent(Integer userId, String object, Integer entityId) {  // добавляю событие в БД
+    public void addEvent(Integer userId, String eventType, String operation, Integer entityId) {  // добавляю событие в БД
         Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
-        if (object.equals("LIKE") || object.equals("REVIEW") || object.equals("FRIEND")) {
-            String sqlQuery = "INSERT INTO events (timestamp, userId, eventType, entityId) VALUES (?,?,?,?)";
-            jdbcTemplate.update(sqlQuery, timestamp, userId, object, entityId);
-        } else if (object.equals("REMOVE") || object.equals("ADD") || object.equals("UPDATE")) {
-            String sqlQuery = "INSERT INTO events (timestamp, userId, operation, entityId) VALUES (?,?,?,?)";
-            jdbcTemplate.update(sqlQuery, timestamp, userId, object, entityId);
-        }
+        String sqlQuery = "INSERT INTO events (timestamp, userId, eventType, operation, entityId) VALUES (?,?,?,?,?)";
+        jdbcTemplate.update(sqlQuery, timestamp, userId, eventType, operation, entityId);
     }
 
     @Override
-    public TreeSet<Event> getEventFeed(Integer userId) {   // получаю из БД список всех событий
-        String sqlQuery = "SELECT * FROM events";
-        return new TreeSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToEvent));
+    public List<Event> getEventFeed(Integer userId) {   // получаю из БД список всех событий
+        String sqlQuery = "SELECT * FROM events WHERE userId=?";
+        List<Event> events = jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);
+        return new ArrayList<>(jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId));
     }
 
     private Event mapRowToEvent(ResultSet rs, int rowNum) throws SQLException {
         return Event.builder()
-                .timestamp(rs.getTimestamp("timestamp"))
+                .timestamp(rs.getTimestamp("timestamp").toInstant().toEpochMilli())
                 .userId(rs.getInt("userId"))
                 .eventType(rs.getString("eventType"))
                 .operation(rs.getString("operation"))
