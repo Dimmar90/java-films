@@ -57,7 +57,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUserById(@PathVariable Integer userId) {
+    public void deleteUserById(@PathVariable("userId") Integer userId) {
         userService.deleteUserById(userId);
     }
 

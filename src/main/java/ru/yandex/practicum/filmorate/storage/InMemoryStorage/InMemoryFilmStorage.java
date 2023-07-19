@@ -42,9 +42,4 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .limit(count)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public void deleteFilmById(Integer filmId) {
-        films.remove(filmId);
-    }
 }

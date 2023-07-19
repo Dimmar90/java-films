@@ -15,5 +15,4 @@ public interface FilmStorage {
 
     List<Film> getTopFilms(Integer count);
 
-    void deleteFilmById(Integer filmId);
 }
