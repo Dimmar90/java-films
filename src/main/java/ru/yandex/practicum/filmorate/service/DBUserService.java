@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.dao.user.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
-import java.util.List;
 import java.util.*;
 
 @Service
