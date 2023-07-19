@@ -11,19 +11,19 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.DBFilmService;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmLikesDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.FriendDaoImpl;
+import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +39,9 @@ class UserDaoImplTest {
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
     private final FilmDao filmStorage;
+    private final FilmLikesDao filmLikesDao;
+    private final UserDaoImpl userDaoImpl;
+    private final DBFilmService dbFilmService;
 
     @BeforeEach
     void setUp() {
@@ -291,6 +294,25 @@ class UserDaoImplTest {
                         .genres(new HashSet<>())
                         .build()
         );
-        List<Film> films =filmStorage.getFilms();
+        List<Film> films = filmStorage.getFilms();
+
+        filmLikesDao.like(1, 1);
+
+        filmLikesDao.like(1, 2);
+        filmLikesDao.like(2, 2);
+        filmLikesDao.like(3, 2);
+
+        filmLikesDao.like(1, 3);
+        filmLikesDao.like(2, 3);
+
+        Set<Film> listFilms = userDaoImpl.getRecommendationsFilms(1, dbFilmService);
+        List<Integer> listId = new ArrayList<>();
+        for (Film film : listFilms) {
+            listId.add(film.getId());
+        }
+
+        assertTrue(listId.contains(2));
+        assertTrue(listId.contains(3));
+        assertTrue(listId.size() == 2);
     }
 }

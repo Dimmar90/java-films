@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
+import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
 import java.util.*;
 
@@ -90,58 +91,7 @@ public class DBUserService {
     public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
         userDao.checkUserExist(id);
         log.info("Get a RecommendationsFilms for user with ID = {}", id);
-        Set<Film> recommendedFilms = new HashSet<>();   // список рекомендованных фильмов
-        List<Film> listFilms = dbFilmService.getFilms();// список всех фильмов
-
-        List<Film> listFilmsUser = new ArrayList<>();// список всех фильмов userа c id
-        for (Film film : listFilms) {
-            if (film.getLikes() != null && film.getLikes().size() > 0 && film.getLikes().contains(id)) {
-                listFilmsUser.add(film);
-            }
-        }
-        if (listFilmsUser.size() == 0) return recommendedFilms;
-
-        HashMap<Integer, List<Film>> usersWithListsFilms = new HashMap<>();  // список всех userов кроме user id и списки их фильмов
-        for (Film film : listFilms) {
-            if (film.getLikes() == null || film.getLikes().size() == 0) continue;
-            for (Integer like : film.getLikes()) {
-                if (like == id) continue;
-                if (usersWithListsFilms.containsKey(like)) {
-                    usersWithListsFilms.get(like).add(film);
-                } else {
-                    List<Film> films = new ArrayList<>();
-                    films.add(film);
-                    usersWithListsFilms.put(like, films);
-                }
-            }
-        }
-
-        HashMap<Integer, List<Film>> usersWithMaxAlignLike = new HashMap<>();  // список всех userов c фильми с максимальным совпадением лайков с userом
-
-        int countOld = 0;
-
-        for (Map.Entry<Integer, List<Film>> integerListEntry : usersWithListsFilms.entrySet()) {
-            int countNew = 0;
-            for (Film film : listFilmsUser) {
-                if (integerListEntry.getValue().contains(film)) {
-                    countNew++;
-                }
-            }
-            if (countNew != 0 && countNew >= countOld) {
-                countOld = countNew;
-                usersWithMaxAlignLike.put(integerListEntry.getKey(), integerListEntry.getValue());
-            } else {
-                continue;
-            }
-        }
-
-        if (usersWithMaxAlignLike.size() > 0) {
-            for (Map.Entry<Integer, List<Film>> integerListEntry : usersWithMaxAlignLike.entrySet()) {
-                integerListEntry.getValue().removeAll(listFilmsUser);
-                recommendedFilms.addAll(integerListEntry.getValue());
-            }
-
-        }
-        return recommendedFilms;
+        UserDaoImpl userDaoImpl = (UserDaoImpl) userDao;
+        return userDaoImpl.getRecommendationsFilms(id, dbFilmService);
     }
 }
