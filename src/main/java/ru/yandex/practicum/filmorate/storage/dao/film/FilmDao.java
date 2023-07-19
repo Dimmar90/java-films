@@ -11,4 +11,6 @@ public interface FilmDao extends FilmStorage {
     List<Film> findDirectorsFilmsSortedByRate(Integer directorId);
 
     List<Film> findDirectorsFilmsSortedByYears(Integer directorId);
+
+    void deleteFilmById(Integer filmId);
 }

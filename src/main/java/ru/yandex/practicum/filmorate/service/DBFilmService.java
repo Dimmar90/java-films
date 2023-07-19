@@ -149,4 +149,10 @@ public class DBFilmService {
             directorDao.addDirectorsListToFilm(film);
         }
     }
+
+    public void deleteFilmById(Integer filmId) {
+        filmDao.checkFilmExist(filmId);
+        filmDao.deleteFilmById(filmId);
+        log.info("Delete film from films with ID = {}", filmId);
+    }
 }

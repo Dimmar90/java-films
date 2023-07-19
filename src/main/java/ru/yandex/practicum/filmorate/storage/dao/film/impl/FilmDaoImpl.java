@@ -80,6 +80,10 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
+    public void deleteFilmById(Integer filmId) {
+        jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
+    }
+
     @Override
     public List<Film> getTopFilms(Integer count) {
         String sqlQuery = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
