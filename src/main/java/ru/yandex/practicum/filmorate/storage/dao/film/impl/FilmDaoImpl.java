@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -89,6 +90,37 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
+
+        String sql = "SELECT f.ID, \n" +
+                "       f.NAME,\n" +
+                "       f.DESCRIPTION,\n" +
+                "       f.DURATION,\n" +
+                "       f.RELEASEDATE,\n" +
+                "       f.MPA_ID, \n" +
+                "       COUNT(fl.USER_ID) AS RATE\n" +
+                "FROM FILM_DIRECTORS fd LEFT JOIN FILMS f ON fd.FILM_ID = f.ID LEFT JOIN FILM_LIKES fl ON fd.FILM_ID =fl.FILM_ID \n" +
+                "WHERE FD.DIRECTOR_ID =?\n" +
+                "GROUP BY fd.FILM_ID \n" +
+                "ORDER BY RATE DESC ";
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> findDirectorsFilmsSortedByYears(Integer directorId) {
+        String sql = "SELECT f.ID, \n" +
+                "       f.NAME,\n" +
+                "       f.DESCRIPTION,\n" +
+                "       f.DURATION,\n" +
+                "       f.RELEASEDATE,\n" +
+                "       f.MPA_ID\n" +
+                "FROM FILM_DIRECTORS fd LEFT JOIN FILMS f ON fd.FILM_ID = f.ID\n" +
+                "WHERE FD.DIRECTOR_ID =?\n" +
+                "ORDER BY EXTRACT (YEAR FROM f.RELEASEDATE)";
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+    }
+
+    @Override
     public boolean checkFilmExist(Integer id) {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
@@ -108,6 +140,12 @@ public class FilmDaoImpl implements FilmDao {
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         Set<Genre> genres = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
 
+        String directorSql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
+                "FROM FILM_DIRECTORS fd LEFT JOIN DIRECTORS d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
+                "WHERE FD .FILM_ID =?\n" +
+                "ORDER BY d.DIRECTOR_ID ";
+        Set<Director> directors = new HashSet<>(jdbcTemplate.query(directorSql, this::mapRowToDirector, filmId));
+
         return Film.builder()
                 .id(filmId)
                 .name(rs.getString("name"))
@@ -116,6 +154,7 @@ public class FilmDaoImpl implements FilmDao {
                 .releaseDate(rs.getDate("releaseDate").toLocalDate())
                 .mpa(mpa)
                 .genres(genres)
+                .directors(directors)
                 .build();
     }
 
@@ -125,5 +164,9 @@ public class FilmDaoImpl implements FilmDao {
 
     private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
         return new Genre(rs.getInt("genre_id"), rs.getString("name"));
+    }
+
+    private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
+        return new Director(rs.getInt("director_id"), rs.getString("name"));
     }
 }

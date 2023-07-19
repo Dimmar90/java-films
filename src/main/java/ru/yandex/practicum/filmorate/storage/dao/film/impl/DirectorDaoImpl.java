@@ -8,11 +8,13 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dao.film.DirectorDao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,8 +61,32 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void deleteDirector(Integer id) {
-        String sqlQuery = "DELETE FROM directors WHERE director_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
+        String sqlDeleteFromDirectors = "DELETE FROM directors WHERE director_id = ?";
+        String sqlDeleteFromFilmDirectors = "DELETE FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?";
+        jdbcTemplate.update(sqlDeleteFromDirectors, id);
+        jdbcTemplate.update(sqlDeleteFromFilmDirectors, id);
+    }
+
+    @Override
+    public void addFilmToDirector(Integer directorId, Integer filmId) {
+        String sqlQuery = "INSERT INTO FILM_DIRECTORS (DIRECTOR_ID,FILM_ID) VALUES (?,?)";
+        jdbcTemplate.update(sqlQuery, directorId, filmId);
+    }
+
+    @Override
+    public void deleteFilmFromDirector(Integer filmId) {
+        String sqlQuery = "DELETE FROM FILM_DIRECTORS WHERE FILM_ID =?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public void addDirectorsListToFilm(Film film) {
+        String sql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
+                "FROM FILM_DIRECTORS fd LEFT JOIN directors d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
+                "WHERE FD .FILM_ID =?\n" +
+                "ORDER BY d.DIRECTOR_ID ";
+        HashSet<Director> listOfDirectors = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToDirector, film.getId()));
+        film.setDirectors(listOfDirectors);
     }
 
     @Override

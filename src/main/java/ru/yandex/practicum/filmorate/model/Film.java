@@ -36,4 +36,5 @@ public class Film {
     private Set<Genre> genres;
     @Setter(AccessLevel.NONE)
     private Set<Integer> likes = new HashSet<>();
+    private Set<Director> directors;
 }

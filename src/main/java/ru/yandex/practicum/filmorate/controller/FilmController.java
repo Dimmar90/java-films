@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.DBFilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -48,8 +49,18 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getTopFilms(
-            @Positive @RequestParam(value = "count", defaultValue = "10") Integer count) {
+    public List<Film> getTopFilms(@Positive @RequestParam(value = "count", defaultValue = "10") Integer count) {
         return filmService.getTopFilms(count);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorsFilms(@PathVariable("directorId") Integer directorId, @RequestParam String sortBy) {
+        List<Film> directorsFilms = new ArrayList<>();
+        if (sortBy.equals("likes")) {
+            directorsFilms = filmService.getDirectorsFilmsByRate(directorId);
+        } else if (sortBy.equals("year")) {
+            directorsFilms = filmService.getDirectorsFilmsByYears(directorId);
+        }
+        return directorsFilms;
     }
 }
