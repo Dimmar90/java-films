@@ -4,4 +4,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 public interface FilmDao extends FilmStorage {
     boolean checkFilmExist(Integer id);
+
+    void deleteFilmById(Integer filmId);
 }

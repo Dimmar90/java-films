@@ -79,4 +79,10 @@ public class DBUserService {
         log.info("Get common friends of users with ID = {} and ID = {}", userId, friendId);
         return friendDao.getCommonFriends(userId, friendId);
     }
+
+    public void deleteUserById(Integer userId) {
+        userDao.checkUserExist(userId);
+        userDao.deleteUserById(userId);
+        log.info("Delete user from users with ID = {}", userId);
+    }
 }

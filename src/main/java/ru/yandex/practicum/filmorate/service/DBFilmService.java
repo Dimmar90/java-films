@@ -102,4 +102,10 @@ public class DBFilmService {
         log.info("Get {} popular films", count);
         return filmDao.getTopFilms(count);
     }
+
+    public void deleteFilmById(Integer filmId) {
+        filmDao.checkFilmExist(filmId);
+        filmDao.deleteFilmById(filmId);
+        log.info("Delete film from films with ID = {}", filmId);
+    }
 }

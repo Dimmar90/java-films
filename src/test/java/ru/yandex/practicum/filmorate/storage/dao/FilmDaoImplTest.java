@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -271,5 +272,18 @@ class FilmDaoImplTest {
         assertTrue(filmStorage.getById(film.getId())
                 .getGenres()
                 .isEmpty());
+    }
+
+    @Test
+    void shouldDeleteFilmById() {
+        filmStorage.createFilm(film);
+        List<Film> expectedFilms = filmStorage.getFilms();
+        film.setId(1);
+        genreStorage.addGenreInFilm(film.getId(), 2);
+
+        assertThat(expectedFilms).hasSize(1).contains(film);
+        filmStorage.deleteFilmById(film.getId());
+        assertThat(filmStorage.getFilms()).hasSize(0);
+        assertThat(genreStorage.getFilmGenres(film.getId())).hasSize(0);
     }
 }

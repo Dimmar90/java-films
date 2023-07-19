@@ -32,8 +32,7 @@ CREATE TABLE IF NOT EXISTS films (
         duration INTEGER CHECK (duration > 0),
         releaseDate DATE,
         mpa_id INTEGER NOT NULL,
-        FOREIGN  KEY (mpa_id) REFERENCES mpa(mpa_id),
-        CONSTRAINT exist_film_name UNIQUE (name)
+        FOREIGN  KEY (mpa_id) REFERENCES mpa(mpa_id)
 );
 
 -- Таблица со всеми жанрами
