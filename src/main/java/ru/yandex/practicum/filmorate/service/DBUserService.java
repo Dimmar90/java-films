@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
+import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -84,5 +86,12 @@ public class DBUserService {
         userDao.checkUserExist(userId);
         userDao.deleteUserById(userId);
         log.info("Delete user from users with ID = {}", userId);
+    }
+
+    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+        userDao.checkUserExist(id);
+        log.info("Get a RecommendationsFilms for user with ID = {}", id);
+        UserDaoImpl userDaoImpl = (UserDaoImpl) userDao;
+        return userDaoImpl.getRecommendationsFilms(id, dbFilmService);
     }
 }
