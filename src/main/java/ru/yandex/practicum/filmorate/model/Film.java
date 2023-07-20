@@ -34,6 +34,7 @@ public class Film {
     @NotNull(message = "Film rating MPA must be completed")
     private Mpa mpa;
     private Set<Genre> genres;
+    private Set<Director> directors;
     @Setter(AccessLevel.NONE)
     private Set<Integer> likes = new HashSet<>();
 }

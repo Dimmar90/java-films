@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.dao.film.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmLikesDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDao;
@@ -22,18 +24,21 @@ public class DBFilmService {
     private final DBUserService userService;
     private final GenreDao genreDao;
     private final FilmLikesDao filmLikesDao;
+    private final DirectorDao directorDao;
 
     @Autowired
     public DBFilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, DBUserService userService,
-                         GenreDao genreDao, FilmLikesDao filmLikesDao) {
+                         GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao) {
         this.filmDao = filmDao;
         this.userService = userService;
         this.genreDao = genreDao;
         this.filmLikesDao = filmLikesDao;
+        this.directorDao = directorDao;
     }
 
     public Film create(Film film) {
         Film newFilm = filmDao.createFilm(film);
+
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
             newFilm.setGenres(new HashSet<>());
             log.info("The film {} has no genres.", film);
@@ -43,6 +48,9 @@ public class DBFilmService {
             }
             newFilm.setGenres(genreDao.getFilmGenres(film.getId()));
         }
+
+        addDirectorsToFilm(film);
+
         log.info("Film {} has been CREATED", film);
         return newFilm;
     }
@@ -63,6 +71,9 @@ public class DBFilmService {
             }
             film.setGenres(genreDao.getFilmGenres(film.getId()));
         }
+
+        addDirectorsToFilm(film);
+
         log.info("Film {} has been UPDATED", film);
         return filmDao.updateFilm(film);
     }
@@ -85,6 +96,7 @@ public class DBFilmService {
         filmDao.checkFilmExist(id);
         Film film = filmDao.getById(id);
         film.setGenres(genreDao.getFilmGenres(film.getId()));
+        directorDao.addDirectorsListToFilm(film);
         log.info("Get a film with ID = {}", id);
         return film;
     }
@@ -93,15 +105,52 @@ public class DBFilmService {
         List<Film> films = new ArrayList<>();
         for (Film film : filmDao.getFilms()) {
             film.setGenres(genreDao.getFilmGenres(film.getId()));
+            directorDao.addDirectorsListToFilm(film);
             films.add(film);
         }
         return films;
+    }
+
+    public List<Film> getDirectorsFilms(Integer directorsId, String sortBy) {
+        List<Film> sortedDirectorsFilms = new ArrayList<>();
+        if (sortBy.equals("likes")) {
+            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByRate(directorsId));
+        } else if (sortBy.equals("year")) {
+            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByYears(directorsId));
+        }
+        return sortedDirectorsFilms;
+    }
+
+    public List<Film> getSortedListOfFilms(Integer directorsId, List<Film> sortedListOfFilms) {
+        directorDao.checkDirectorExist(directorsId);
+        List<Film> directorFilms = new ArrayList<>();
+        for (Film film : sortedListOfFilms) {
+            film.setGenres(genreDao.getFilmGenres(film.getId()));
+            directorFilms.add(film);
+        }
+        return directorFilms;
     }
 
     public List<Film> getTopFilms(Integer count) {
         log.info("Get {} popular films", count);
         return filmDao.getTopFilms(count);
     }
+
+
+    public void addDirectorsToFilm(Film film) {
+        if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
+            directorDao.deleteFilmFromDirector(film.getId());
+            film.setDirectors(new HashSet<>());
+        } else {
+            for (Director director : film.getDirectors()) {
+                if (directorDao.checkDirectorExist(director.getId())) {
+                    directorDao.addFilmToDirector(director.getId(), film.getId());
+                }
+            }
+            directorDao.addDirectorsListToFilm(film);
+        }
+    }
+
 
     public void deleteFilmById(Integer filmId) {
         filmDao.checkFilmExist(filmId);

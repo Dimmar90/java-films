@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -79,6 +80,10 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
+    public void deleteFilmById(Integer filmId) {
+        jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
+    }
+
     @Override
     public List<Film> getTopFilms(Integer count) {
         String sqlQuery = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
@@ -89,8 +94,28 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+
+    public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
+
+        String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
+                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id LEFT JOIN film_likes fl ON fd.film_id = fl.film_id " +
+                "WHERE fd.director_id = ? " +
+                "GROUP BY fd.film_id " +
+                "ORDER BY rate DESC";
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> findDirectorsFilmsSortedByYears(Integer directorId) {
+        String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id " +
+                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
+                "WHERE fd.director_id =? " +
+                "ORDER BY EXTRACT (YEAR FROM f.releaseDate)";
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+
     public void deleteFilmById(Integer filmId) {
         jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
+
     }
 
     @Override
@@ -107,11 +132,16 @@ public class FilmDaoImpl implements FilmDao {
         int mpaId = rs.getInt("mpa_id");
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
-
         int filmId = rs.getInt("id");
         String sql = "SELECT genre_id, name FROM genres WHERE genre_id IN" +
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         Set<Genre> genres = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
+
+        String directorSql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
+                "FROM FILM_DIRECTORS fd LEFT JOIN DIRECTORS d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
+                "WHERE FD .FILM_ID =?\n" +
+                "ORDER BY d.DIRECTOR_ID ";
+        Set<Director> directors = new HashSet<>(jdbcTemplate.query(directorSql, this::mapRowToDirector, filmId));
 
         return Film.builder()
                 .id(filmId)
@@ -121,6 +151,7 @@ public class FilmDaoImpl implements FilmDao {
                 .releaseDate(rs.getDate("releaseDate").toLocalDate())
                 .mpa(mpa)
                 .genres(genres)
+                .directors(directors)
                 .build();
     }
 
@@ -130,5 +161,9 @@ public class FilmDaoImpl implements FilmDao {
 
     private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
         return new Genre(rs.getInt("genre_id"), rs.getString("name"));
+    }
+
+    private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
+        return new Director(rs.getInt("director_id"), rs.getString("name"));
     }
 }
