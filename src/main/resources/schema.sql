@@ -1,5 +1,5 @@
 -- Для тестов
-DROP TABLE IF EXISTS users, friendship, mpa, films, genres, film_genres, film_likes, directors, film_directors;
+DROP TABLE IF EXISTS users, friendship, mpa, films, genres, film_genres, film_likes, directors, film_directors, events;
 
 -- Таблица с пользователями
 CREATE TABLE IF NOT EXISTS users (

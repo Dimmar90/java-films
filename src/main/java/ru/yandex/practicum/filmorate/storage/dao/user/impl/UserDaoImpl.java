@@ -8,14 +8,18 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.DBFilmService;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Component("userDaoImpl")
 @RequiredArgsConstructor
@@ -68,6 +72,24 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void deleteUserById(Integer userId) {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
+    }
+
+    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+        String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
+                "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
+                "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
+                "GROUP BY USER_ID HAVING COUNT(USER_ID)= (SELECT MAX(max) FROM (SELECT USER_ID, COUNT(USER_ID) AS max " +
+                "FROM FILM_LIKES WHERE FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) " +
+                "AND NOT USER_ID=? GROUP BY USER_ID))) " +
+                "AND NOT FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?)";
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
+        Set<Film> recomendatedFilms = new HashSet<>();
+        while (rowSet.next()) {
+            Film film = dbFilmService.getFilm(rowSet.getInt("FILM_ID"));
+            recomendatedFilms.add(film);
+        }
+        return recomendatedFilms;
     }
 
     @Override
