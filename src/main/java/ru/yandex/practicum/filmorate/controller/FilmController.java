@@ -55,13 +55,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorsFilms(@PathVariable("directorId") Integer directorId, @RequestParam String sortBy) {
-        List<Film> directorsFilms = new ArrayList<>();
-        if (sortBy.equals("likes")) {
-            directorsFilms = filmService.getDirectorsFilmsByRate(directorId);
-        } else if (sortBy.equals("year")) {
-            directorsFilms = filmService.getDirectorsFilmsByYears(directorId);
-        }
-        return directorsFilms;
+        return filmService.getDirectorsFilms(directorId,sortBy);
     }
 
     @DeleteMapping("/{filmId}")

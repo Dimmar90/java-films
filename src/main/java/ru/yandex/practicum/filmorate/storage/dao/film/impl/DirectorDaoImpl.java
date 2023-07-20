@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-@Component("directorDaoImpl")
+@Component()
 @RequiredArgsConstructor
 public class DirectorDaoImpl implements DirectorDao {
     private final JdbcTemplate jdbcTemplate;
@@ -40,9 +40,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director updateDirector(Director director) {
-        String sqlQuery = "UPDATE directors SET " +
-                "name = ?" +
-                "WHERE director_id = ?";
+        String sqlQuery = "UPDATE directors SET name = ? WHERE director_id = ?";
         jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
         return director;
     }
@@ -61,30 +59,27 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void deleteDirector(Integer id) {
-        String sqlDeleteFromDirectors = "DELETE FROM directors WHERE director_id = ?";
-        String sqlDeleteFromFilmDirectors = "DELETE FROM FILM_DIRECTORS WHERE DIRECTOR_ID = ?";
-        jdbcTemplate.update(sqlDeleteFromDirectors, id);
-        jdbcTemplate.update(sqlDeleteFromFilmDirectors, id);
+        jdbcTemplate.update("DELETE FROM directors WHERE director_id = ?", id);
     }
 
     @Override
     public void addFilmToDirector(Integer directorId, Integer filmId) {
-        String sqlQuery = "INSERT INTO FILM_DIRECTORS (DIRECTOR_ID,FILM_ID) VALUES (?,?)";
+        String sqlQuery = "INSERT INTO film_directors (director_id,film_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, directorId, filmId);
     }
 
     @Override
     public void deleteFilmFromDirector(Integer filmId) {
-        String sqlQuery = "DELETE FROM FILM_DIRECTORS WHERE FILM_ID =?";
+        String sqlQuery = "DELETE FROM film_directors WHERE film_id =?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
 
     @Override
     public void addDirectorsListToFilm(Film film) {
-        String sql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
-                "FROM FILM_DIRECTORS fd LEFT JOIN directors d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
-                "WHERE FD .FILM_ID =?\n" +
-                "ORDER BY d.DIRECTOR_ID ";
+        String sql = "SELECT d.director_id, d.name " +
+                "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                "WHERE fd.film_id = ? " +
+                "ORDER BY d.director_id";
         HashSet<Director> listOfDirectors = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToDirector, film.getId()));
         film.setDirectors(listOfDirectors);
     }

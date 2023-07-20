@@ -111,20 +111,20 @@ public class DBFilmService {
         return films;
     }
 
-    public List<Film> getDirectorsFilmsByRate(Integer directorsId) {
-        directorDao.checkDirectorExist(directorsId);
-        List<Film> directorFilms = new ArrayList<>();
-        for (Film film : filmDao.findDirectorsFilmsSortedByRate(directorsId)) {
-            film.setGenres(genreDao.getFilmGenres(film.getId()));
-            directorFilms.add(film);
+    public List<Film> getDirectorsFilms(Integer directorsId, String sortBy) {
+        List<Film> sortedDirectorsFilms = new ArrayList<>();
+        if (sortBy.equals("likes")) {
+            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByRate(directorsId));
+        } else if (sortBy.equals("year")) {
+            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByYears(directorsId));
         }
-        return directorFilms;
+        return sortedDirectorsFilms;
     }
 
-    public List<Film> getDirectorsFilmsByYears(Integer directorsId) {
+    public List<Film> getSortedListOfFilms(Integer directorsId, List<Film> sortedListOfFilms) {
         directorDao.checkDirectorExist(directorsId);
         List<Film> directorFilms = new ArrayList<>();
-        for (Film film : filmDao.findDirectorsFilmsSortedByYears(directorsId)) {
+        for (Film film : sortedListOfFilms) {
             film.setGenres(genreDao.getFilmGenres(film.getId()));
             directorFilms.add(film);
         }
@@ -136,11 +136,11 @@ public class DBFilmService {
         return filmDao.getTopFilms(count);
     }
 
-    public void addDirectorsToFilm(Film film){
+    public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
             directorDao.deleteFilmFromDirector(film.getId());
             film.setDirectors(new HashSet<>());
-        }else {
+        } else {
             for (Director director : film.getDirectors()) {
                 if (directorDao.checkDirectorExist(director.getId())) {
                     directorDao.addFilmToDirector(director.getId(), film.getId());

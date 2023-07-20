@@ -96,31 +96,20 @@ public class FilmDaoImpl implements FilmDao {
     @Override
     public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
 
-        String sql = "SELECT f.ID, \n" +
-                "       f.NAME,\n" +
-                "       f.DESCRIPTION,\n" +
-                "       f.DURATION,\n" +
-                "       f.RELEASEDATE,\n" +
-                "       f.MPA_ID, \n" +
-                "       COUNT(fl.USER_ID) AS RATE\n" +
-                "FROM FILM_DIRECTORS fd LEFT JOIN FILMS f ON fd.FILM_ID = f.ID LEFT JOIN FILM_LIKES fl ON fd.FILM_ID =fl.FILM_ID \n" +
-                "WHERE FD.DIRECTOR_ID =?\n" +
-                "GROUP BY fd.FILM_ID \n" +
-                "ORDER BY RATE DESC ";
+        String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
+                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id LEFT JOIN film_likes fl ON fd.film_id = fl.film_id " +
+                "WHERE fd.director_id = ? " +
+                "GROUP BY fd.film_id " +
+                "ORDER BY rate DESC";
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
     @Override
     public List<Film> findDirectorsFilmsSortedByYears(Integer directorId) {
-        String sql = "SELECT f.ID, \n" +
-                "       f.NAME,\n" +
-                "       f.DESCRIPTION,\n" +
-                "       f.DURATION,\n" +
-                "       f.RELEASEDATE,\n" +
-                "       f.MPA_ID\n" +
-                "FROM FILM_DIRECTORS fd LEFT JOIN FILMS f ON fd.FILM_ID = f.ID\n" +
-                "WHERE FD.DIRECTOR_ID =?\n" +
-                "ORDER BY EXTRACT (YEAR FROM f.RELEASEDATE)";
+        String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id " +
+                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
+                "WHERE fd.director_id =? " +
+                "ORDER BY EXTRACT (YEAR FROM f.releaseDate)";
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
@@ -138,7 +127,6 @@ public class FilmDaoImpl implements FilmDao {
         int mpaId = rs.getInt("mpa_id");
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
-
         int filmId = rs.getInt("id");
         String sql = "SELECT genre_id, name FROM genres WHERE genre_id IN" +
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
