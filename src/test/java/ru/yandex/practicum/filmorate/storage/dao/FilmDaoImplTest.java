@@ -144,7 +144,71 @@ class FilmDaoImplTest {
     }*/
 
     @Test
-    void shouldThrowsInvalidCheckCheckFilmExist() {
+    void shouldGetCommonFilms() {
+        User user1 = userStorage.createUser(
+                User.builder()
+                        .email("user1@gmail.com")
+                        .login("alex")
+                        .name("Alex")
+                        .birthday(LocalDate.of(1980, 5, 25))
+                        .build());
+
+        User user2 = userStorage.createUser(
+                User.builder()
+                        .email("user2@gmail.com")
+                        .login("john")
+                        .name("Johny")
+                        .birthday(LocalDate.of(1989, 7, 4))
+                        .build());
+
+        User user3 = userStorage.createUser(
+                User.builder()
+                        .email("user3@gmail.com")
+                        .login("ivan")
+                        .name("vano")
+                        .birthday(LocalDate.of(1988, 8, 17))
+                        .build());
+
+        Film film1 = filmStorage.createFilm(film);
+        Film film2 = filmStorage.createFilm(
+                Film.builder()
+                        .name("Avatar")
+                        .description("description about Avatar")
+                        .duration(180)
+                        .releaseDate(LocalDate.of(2009, 12, 10))
+                        .mpa(new Mpa(2, "PG"))
+                        .genres(new HashSet<>())
+                        .build()
+        );
+
+        Film film3 = filmStorage.createFilm(
+                Film.builder()
+                        .name("Kill Bill")
+                        .description("description about Kill Bill")
+                        .duration(130)
+                        .releaseDate(LocalDate.of(2003, 10, 8))
+                        .mpa(new Mpa(1, "G"))
+                        .genres(new HashSet<>())
+                        .build()
+        );
+
+        likesStorage.like(film1.getId(), user2.getId());
+        likesStorage.like(film1.getId(), user3.getId());
+
+        likesStorage.like(film2.getId(), user1.getId());
+        likesStorage.like(film2.getId(), user2.getId());
+
+        likesStorage.like(film3.getId(), user1.getId());
+        likesStorage.like(film3.getId(), user2.getId());
+        likesStorage.like(film3.getId(), user3.getId());
+
+        List<Film> topFilms = List.of(film3, film2); // Ожидаемый порядок списка общих фильмов
+        assertEquals(topFilms, filmStorage.getCommonFilms(user1.getId(), user2.getId()));
+        assertEquals(topFilms, filmStorage.getCommonFilms(user2.getId(), user1.getId()));
+    }
+
+    @Test
+    void shouldThrowsInvalidCheckFilmExist() {
         filmStorage.createFilm(film);
 
         final NotFoundException e = assertThrows(

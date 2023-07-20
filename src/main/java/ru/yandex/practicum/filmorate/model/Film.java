@@ -36,5 +36,5 @@ public class Film {
     private Set<Genre> genres;
     private Set<Director> directors;
     @Setter(AccessLevel.NONE)
-    private Set<Integer> likes = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>(); // для реализации InMemory storage
 }
