@@ -15,4 +15,6 @@ public interface FilmDao extends FilmStorage {
 
 
     void deleteFilmById(Integer filmId);
+
+    List<Film> getTopFilms(Integer count, Integer genreId, Integer year);
 }
