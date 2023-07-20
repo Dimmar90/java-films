@@ -94,6 +94,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+
     public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
 
         String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
@@ -111,6 +112,10 @@ public class FilmDaoImpl implements FilmDao {
                 "WHERE fd.director_id =? " +
                 "ORDER BY EXTRACT (YEAR FROM f.releaseDate)";
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+
+    public void deleteFilmById(Integer filmId) {
+        jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
+
     }
 
     @Override

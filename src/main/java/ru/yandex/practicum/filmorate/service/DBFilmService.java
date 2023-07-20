@@ -136,6 +136,7 @@ public class DBFilmService {
         return filmDao.getTopFilms(count);
     }
 
+
     public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
             directorDao.deleteFilmFromDirector(film.getId());
@@ -149,6 +150,7 @@ public class DBFilmService {
             directorDao.addDirectorsListToFilm(film);
         }
     }
+
 
     public void deleteFilmById(Integer filmId) {
         filmDao.checkFilmExist(filmId);

@@ -66,6 +66,11 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public void deleteUserById(Integer userId) {
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
+    }
+
+    @Override
     public boolean checkUserExist(Integer id) {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
