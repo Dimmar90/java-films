@@ -74,6 +74,24 @@ public class UserDaoImpl implements UserDao {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
     }
 
+    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+        String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
+                "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
+                "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
+                "GROUP BY USER_ID HAVING COUNT(USER_ID)= (SELECT MAX(max) FROM (SELECT USER_ID, COUNT(USER_ID) AS max " +
+                "FROM FILM_LIKES WHERE FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) " +
+                "AND NOT USER_ID=? GROUP BY USER_ID))) " +
+                "AND NOT FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?)";
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
+        Set<Film> recomendatedFilms = new HashSet<>();
+        while (rowSet.next()) {
+            Film film = dbFilmService.getFilm(rowSet.getInt("FILM_ID"));
+            recomendatedFilms.add(film);
+        }
+        return recomendatedFilms;
+    }
+
     @Override
     public boolean checkUserExist(Integer id) {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
@@ -92,23 +110,5 @@ public class UserDaoImpl implements UserDao {
                 .name(rs.getString("name"))
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
-    }
-
-    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
-        String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
-                "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
-                "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
-                "GROUP BY USER_ID HAVING COUNT(USER_ID)= (SELECT MAX(max) FROM (SELECT USER_ID, COUNT(USER_ID) AS max " +
-                "FROM FILM_LIKES WHERE FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) " +
-                "AND NOT USER_ID=? GROUP BY USER_ID))) " +
-                "AND NOT FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?)";
-
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
-        Set<Film> recomendatedFilms = new HashSet<>();
-        while (rowSet.next()) {
-            Film film = dbFilmService.getFilm(rowSet.getInt("FILM_ID"));
-            recomendatedFilms.add(film);
-        }
-        return recomendatedFilms;
     }
 }
