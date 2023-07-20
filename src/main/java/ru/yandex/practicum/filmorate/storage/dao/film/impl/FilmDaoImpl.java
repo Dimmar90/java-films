@@ -112,11 +112,8 @@ public class FilmDaoImpl implements FilmDao {
                 "WHERE fd.director_id =? " +
                 "ORDER BY EXTRACT (YEAR FROM f.releaseDate)";
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
-
-    public void deleteFilmById(Integer filmId) {
-        jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
-
     }
+
 
     @Override
     public boolean checkFilmExist(Integer id) {
