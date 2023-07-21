@@ -16,10 +16,7 @@ import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Component("filmDaoImpl")
 @RequiredArgsConstructor
@@ -85,12 +82,21 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count) {
+    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
+        List<String> params = new ArrayList<>();
+
         String sqlQuery = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genres AS fg ON f.id = fg.film_id %s " +
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC LIMIT ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+
+        if (genreId != null) params.add(String.format("genre_id = %s", genreId));
+        if (year != null) params.add(String.format("year(releaseDate) = %s", year));
+
+        String sqlParams = !params.isEmpty() ? "WHERE ".concat(String.join(" AND ", params)) : "";
+
+        return jdbcTemplate.query(String.format(sqlQuery, sqlParams), this::mapRowToFilm, count);
     }
 
     @Override

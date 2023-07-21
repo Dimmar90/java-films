@@ -131,9 +131,9 @@ public class DBFilmService {
         return directorFilms;
     }
 
-    public List<Film> getTopFilms(Integer count) {
+    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
         log.info("Get {} popular films", count);
-        return filmDao.getTopFilms(count);
+        return filmDao.getTopFilms(count, genreId, year);
     }
 
 

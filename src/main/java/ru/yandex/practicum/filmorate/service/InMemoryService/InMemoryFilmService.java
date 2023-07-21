@@ -73,8 +73,4 @@ public class InMemoryFilmService {
         return filmStorage.getFilms();
     }
 
-    public List<Film> getTopFilms(Integer count) {
-        log.info("Get {} popular films", count);
-        return filmStorage.getTopFilms(count);
-    }
 }
