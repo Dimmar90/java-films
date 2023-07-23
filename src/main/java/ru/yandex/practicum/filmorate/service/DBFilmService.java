@@ -136,6 +136,12 @@ public class DBFilmService {
         return filmDao.getTopFilms(count, genreId, year);
     }
 
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
+        userService.getUser(friendId); // метод getUser() выбросит исключение, если friendId не существует
+        log.info("Get common films of users with ID = {} and ID = {}", userId, friendId);
+        return filmDao.getCommonFilms(userId, friendId);
+    }
 
     public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
