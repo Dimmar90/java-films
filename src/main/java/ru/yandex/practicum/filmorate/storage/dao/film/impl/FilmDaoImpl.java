@@ -100,7 +100,17 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        String sqlQuery = "SELECT f.* FROM films f " +
+                "JOIN film_likes fl1 ON fl1.film_id = f.id " +
+                "JOIN film_likes fl2 ON fl2.film_id = f.id " +
+                "WHERE fl1.user_id = ? AND fl2.user_id = ? " +
+                "GROUP BY f.id " +
+                "ORDER BY (SELECT COUNT(user_id) FROM film_likes WHERE film_id = f.id) DESC";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
+    }
 
+    @Override
     public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
 
         String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
@@ -119,7 +129,6 @@ public class FilmDaoImpl implements FilmDao {
                 "ORDER BY EXTRACT (YEAR FROM f.releaseDate)";
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
-
 
     @Override
     public boolean checkFilmExist(Integer id) {
