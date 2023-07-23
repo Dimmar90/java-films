@@ -178,4 +178,53 @@ public class FilmDaoImpl implements FilmDao {
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
         return new Director(rs.getInt("director_id"), rs.getString("name"));
     }
+
+    @Override
+    public List<Film> search(String keyWord, String whereSearch) {
+        String[] s = whereSearch.split(",");
+        if(s.length == 2) {
+            return searchByDirAndTitle(keyWord);
+        } else {
+            if(s[0].equals("director")) {
+                return searchByDirector(keyWord);
+            } else {
+                return searchByTitle(keyWord);
+            }
+        }
+    }
+
+    private List<Film> searchByDirector(String keyWord) {
+        String newSql = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "WHERE lower(d.name) LIKE lower(?)" +
+                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
+        String keyWordForSql = "%" + keyWord + "%";
+        return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
+    }
+
+    private List<Film> searchByTitle(String keyWord) {
+        String newSql = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "WHERE lower(f.name) LIKE lower(?)" +
+                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
+        String keyWordForSql = "%" + keyWord + "%";
+        return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
+    }
+
+    private List<Film> searchByDirAndTitle(String keyWord) {
+        String newSql = "SELECT f.*, m.name AS mpa_name, d.name FROM films AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "WHERE lower(f.name) LIKE lower(?) or " +
+                "lower(d.name) LIKE lower(?) " +
+                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
+        String keyWordForSql = "%" + keyWord + "%";
+        return jdbcTemplate.query(newSql, this::mapRowToFilm, keyWordForSql, keyWordForSql);
+    }
 }

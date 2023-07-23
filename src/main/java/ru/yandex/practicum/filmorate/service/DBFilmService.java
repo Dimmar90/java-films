@@ -151,7 +151,6 @@ public class DBFilmService {
         }
     }
 
-
     public void deleteFilmById(Integer filmId) {
         filmDao.checkFilmExist(filmId);
         filmDao.deleteFilmById(filmId);
@@ -163,5 +162,9 @@ public class DBFilmService {
         userService.getUser(friendId); // метод getUser() выбросит исключение, если friendId не существует
         log.info("Get common films of users with ID = {} and ID = {}", userId, friendId);
         return filmDao.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> search(String keyWord, String whereSearch) {
+        return filmDao.search(keyWord, whereSearch);
     }
 }
