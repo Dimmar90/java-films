@@ -51,12 +51,12 @@ public class FriendDaoImpl implements FriendDao {
         while (rs.next()) {
             users.add(
                     User.builder()
-                        .id(rs.getInt("id"))
-                        .email(rs.getString("email"))
-                        .login(rs.getString("login"))
-                        .name(rs.getString("name"))
-                        .birthday(Objects.requireNonNull(rs.getDate("birthday")).toLocalDate())
-                        .build()
+                            .id(rs.getInt("id"))
+                            .email(rs.getString("email"))
+                            .login(rs.getString("login"))
+                            .name(rs.getString("name"))
+                            .birthday(Objects.requireNonNull(rs.getDate("birthday")).toLocalDate())
+                            .build()
             );
         }
         return users;

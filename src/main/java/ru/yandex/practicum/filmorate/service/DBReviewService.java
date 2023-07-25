@@ -31,7 +31,7 @@ public class DBReviewService {
         review = reviewDao.create(review);
 
         log.info("Review {} has been CREATED", review);
-        eventDao.addEvent(review.getUserId(),"REVIEW","ADD",review.getReviewId()); // добавляю событие в ленту
+        eventDao.addEvent(review.getUserId(), "REVIEW", "ADD", review.getReviewId()); // добавляю событие в ленту
         return review;
     }
 
@@ -41,7 +41,7 @@ public class DBReviewService {
         }
         review = reviewDao.update(review);
         log.info("Review {} has been UPDATED", review);
-        eventDao.addEvent(review.getUserId(),"REVIEW","UPDATE",review.getFilmId()); // добавляю событие в ленту
+        eventDao.addEvent(review.getUserId(), "REVIEW", "UPDATE", review.getFilmId()); // добавляю событие в ленту
         return review;
     }
 
@@ -88,7 +88,7 @@ public class DBReviewService {
         if (id == null || !reviewDao.checkReviewExist(id)) {
             throw new NotFoundException("Can't delete a review with ID = null");
         }
-        eventDao.addEvent(getReview(id).getUserId(),"REVIEW","REMOVE",getReview(id).getFilmId()); // добавляю событие в ленту
+        eventDao.addEvent(getReview(id).getUserId(), "REVIEW", "REMOVE", getReview(id).getFilmId()); // добавляю событие в ленту
         reviewDao.deleteById(id);
         log.info("Deleted review ID = {}", id);
 

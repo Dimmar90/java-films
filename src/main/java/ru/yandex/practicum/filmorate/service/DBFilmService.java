@@ -86,7 +86,7 @@ public class DBFilmService {
         userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.like(filmId, userId);
         log.info("Film with ID = {} was LIKED by user with ID = {}", filmId, userId);
-        eventDao.addEvent(userId,"LIKE","ADD",filmId); // добавляю событие в ленту
+        eventDao.addEvent(userId, "LIKE", "ADD", filmId); // добавляю событие в ленту
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
@@ -94,7 +94,7 @@ public class DBFilmService {
         userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.unlike(filmId, userId);
         log.info("Film with ID = {} was UNLIKED by user with ID = {}", filmId, userId);
-        eventDao.addEvent(userId,"LIKE","REMOVE",filmId); // удаляю событие из ленты
+        eventDao.addEvent(userId, "LIKE", "REMOVE", filmId); // удаляю событие из ленты
     }
 
     public Film getFilm(Integer id) {
