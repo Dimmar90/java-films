@@ -136,7 +136,6 @@ public class DBFilmService {
         return filmDao.getTopFilms(count, genreId, year);
     }
 
-
     public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
             directorDao.deleteFilmFromDirector(film.getId());

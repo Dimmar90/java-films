@@ -82,21 +82,20 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public List<Film> getTopFilms(Integer count) {
+        return jdbcTemplate.query(String.format(getSqlForTopFilms(), ""), this::mapRowToFilm, count);
+    }
+
+    @Override
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
+        if (genreId == null & year == null) return getTopFilms(count);
+
         List<String> params = new ArrayList<>();
-
-        String sqlQuery = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
-                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
-                "LEFT JOIN film_genres AS fg ON f.id = fg.film_id %s " +
-                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC LIMIT ?";
-
         if (genreId != null) params.add(String.format("genre_id = %s", genreId));
         if (year != null) params.add(String.format("year(releaseDate) = %s", year));
+        String sqlParams = "WHERE ".concat(String.join(" AND ", params));
 
-        String sqlParams = !params.isEmpty() ? "WHERE ".concat(String.join(" AND ", params)) : "";
-
-        return jdbcTemplate.query(String.format(sqlQuery, sqlParams), this::mapRowToFilm, count);
+        return jdbcTemplate.query(String.format(getSqlForTopFilms(), sqlParams), this::mapRowToFilm, count);
     }
 
     @Override
@@ -112,9 +111,10 @@ public class FilmDaoImpl implements FilmDao {
 
     @Override
     public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
-
-        String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
-                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id LEFT JOIN film_likes fl ON fd.film_id = fl.film_id " +
+        String sql = "SELECT f.id, f.name, f.description, f.duration, " +
+                "f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
+                "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
+                "LEFT JOIN film_likes fl ON fd.film_id = fl.film_id " +
                 "WHERE fd.director_id = ? " +
                 "GROUP BY fd.film_id " +
                 "ORDER BY rate DESC";
@@ -226,5 +226,13 @@ public class FilmDaoImpl implements FilmDao {
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
         String keyWordForSql = "%" + keyWord + "%";
         return jdbcTemplate.query(newSql, this::mapRowToFilm, keyWordForSql, keyWordForSql);
+    }
+
+    private String getSqlForTopFilms() {
+        return "SELECT f.*, m.name AS mpa_name FROM films AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genres AS fg ON f.id = fg.film_id %s " +
+                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC LIMIT ?";
     }
 }
