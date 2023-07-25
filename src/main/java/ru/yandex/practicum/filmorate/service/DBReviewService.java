@@ -91,7 +91,6 @@ public class DBReviewService {
         eventDao.addEvent(getReview(id).getUserId(), "REVIEW", "REMOVE", getReview(id).getFilmId()); // добавляю событие в ленту
         reviewDao.deleteById(id);
         log.info("Deleted review ID = {}", id);
-
     }
 
     private void checkExistReviewAndUser(Integer id, Integer userId) {
