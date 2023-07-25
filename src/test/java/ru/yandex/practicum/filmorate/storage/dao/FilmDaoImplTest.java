@@ -8,14 +8,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmLikesDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.MpaDao;
+import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
+import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDislikeDao;
+import ru.yandex.practicum.filmorate.storage.dao.review.ReviewLikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
 import javax.validation.ConstraintViolation;
@@ -41,6 +41,9 @@ class FilmDaoImplTest {
     private final GenreDao genreStorage;
     private final MpaDao mpaStorage;
     private final FilmLikesDao likesStorage;
+    private final ReviewDao reviewStorage;
+    private final ReviewLikeDao reviewLikeStorage;
+    private final ReviewDislikeDao reviewDislikeStorage;
     private Film film;
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
@@ -55,6 +58,7 @@ class FilmDaoImplTest {
                 .mpa(new Mpa(1, "G"))
                 .directors(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
     }
 
@@ -119,7 +123,7 @@ class FilmDaoImplTest {
         assertEquals(film, filmStorage.getById(1));
     }
 
-   /* @Test
+    @Test
     void shouldGetTopFilms() {
         User user = userStorage.createUser(
                 User.builder()
@@ -138,13 +142,13 @@ class FilmDaoImplTest {
                         .releaseDate(LocalDate.of(2001, 3, 8))
                         .mpa(new Mpa(1, "G"))
                         .genres(new HashSet<>())
-                        .build()
-        );
+                        .directors(new HashSet<>())
+                        .build());
 
         likesStorage.like(film2.getId(), user.getId());
         List<Film> topFilms = List.of(film2, film1);
         assertEquals(topFilms, filmStorage.getTopFilms(2));
-    }*/
+    }
 
     @Test
     void shouldGetCommonFilms() {
@@ -359,5 +363,189 @@ class FilmDaoImplTest {
         filmStorage.deleteFilmById(film.getId());
         assertThat(filmStorage.getFilms()).hasSize(0);
         assertThat(genreStorage.getFilmGenres(film.getId())).hasSize(0);
+    }
+
+    @Test
+    void shouldGetEmptyListReviews() {
+        assertTrue(reviewStorage.getAllReviews(null, 10).isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyListReviewsForFilm() {
+        filmStorage.createFilm(film);
+        assertTrue(reviewStorage.getAllReviews(film.getId(), 10).isEmpty());
+    }
+
+    @Test
+    void shouldGetListReviewsForFilm() {
+        filmStorage.createFilm(film);
+
+        User user = userStorage.createUser(
+                User.builder()
+                        .email("user1@gmail.com")
+                        .login("alex")
+                        .name("Alex")
+                        .birthday(LocalDate.of(1980, 5, 25))
+                        .build());
+
+        Review review = reviewStorage.create(
+                Review.builder()
+                        .content("Так себе фильм.")
+                        .isPositive(false)
+                        .userId(user.getId())
+                        .filmId(film.getId())
+                        .build());
+
+        List<Review> expected = List.of(review);
+        assertEquals(expected, reviewStorage.getAllReviews(film.getId(), 10));
+    }
+
+    @Test
+    void shouldGetListReviewsForFilmRangedByUseful() {
+        filmStorage.createFilm(film);
+
+        User user1 = userStorage.createUser(
+                User.builder()
+                        .email("user1@gmail.com")
+                        .login("alex")
+                        .name("Alex")
+                        .birthday(LocalDate.of(1980, 5, 25))
+                        .build());
+
+        User user2 = userStorage.createUser(
+                User.builder()
+                        .email("user2@gmail.com")
+                        .login("john")
+                        .name("Johny")
+                        .birthday(LocalDate.of(1989, 7, 4))
+                        .build());
+
+        User user3 = userStorage.createUser(
+                User.builder()
+                        .email("user3@gmail.com")
+                        .login("ivan")
+                        .name("vano")
+                        .birthday(LocalDate.of(1988, 8, 17))
+                        .build());
+
+        Review review1 = reviewStorage.create(
+                Review.builder()
+                        .content("Так себе фильм.")
+                        .isPositive(false)
+                        .userId(user1.getId())
+                        .filmId(film.getId())
+                        .build());
+
+        Review review2 = reviewStorage.create(
+                Review.builder()
+                        .content("Неплохой фильм,но на один раз.")
+                        .isPositive(true)
+                        .userId(user2.getId())
+                        .filmId(film.getId())
+                        .build());
+
+        Review review3 = reviewStorage.create(
+                Review.builder()
+                        .content("Нормально.")
+                        .isPositive(true)
+                        .userId(user3.getId())
+                        .filmId(film.getId())
+                        .build());
+
+        reviewDislikeStorage.setDislike(review1.getReviewId(), user2.getId());
+        reviewDislikeStorage.setDislike(review1.getReviewId(), user3.getId());
+        reviewLikeStorage.setLike(review2.getReviewId(), user3.getId());
+
+        List<Review> expected = List.of(
+                reviewStorage.getById(review2.getReviewId()),
+                reviewStorage.getById(review3.getReviewId()),
+                reviewStorage.getById(review1.getReviewId())
+        );
+        assertEquals(expected, reviewStorage.getAllReviews(film.getId(), 10));
+    }
+
+    @Test
+    void shouldGetListReviewsForFilmsRangedByUseful() {
+        Film film1 = filmStorage.createFilm(film);
+        Film film2 = filmStorage.createFilm(
+                Film.builder()
+                        .name("Avatar")
+                        .description("description about Avatar")
+                        .duration(180)
+                        .releaseDate(LocalDate.of(2009, 12, 10))
+                        .mpa(new Mpa(2, "PG"))
+                        .genres(new HashSet<>())
+                        .build());
+
+        User user1 = userStorage.createUser(
+                User.builder()
+                        .email("user1@gmail.com")
+                        .login("alex")
+                        .name("Alex")
+                        .birthday(LocalDate.of(1980, 5, 25))
+                        .build());
+
+        User user2 = userStorage.createUser(
+                User.builder()
+                        .email("user2@gmail.com")
+                        .login("john")
+                        .name("Johny")
+                        .birthday(LocalDate.of(1989, 7, 4))
+                        .build());
+
+        User user3 = userStorage.createUser(
+                User.builder()
+                        .email("user3@gmail.com")
+                        .login("ivan")
+                        .name("vano")
+                        .birthday(LocalDate.of(1988, 8, 17))
+                        .build());
+
+        Review review1 = reviewStorage.create(
+                Review.builder()
+                        .content("Так себе фильм.")
+                        .isPositive(false)
+                        .userId(user1.getId())
+                        .filmId(film.getId())
+                        .build());
+
+        Review review2 = reviewStorage.create(
+                Review.builder()
+                        .content("Неплохой фильм,но на один раз.")
+                        .isPositive(true)
+                        .userId(user2.getId())
+                        .filmId(film1.getId())
+                        .build());
+
+        Review review3 = reviewStorage.create(
+                Review.builder()
+                        .content("Шикарный фильм, Кэмерон могет!")
+                        .isPositive(true)
+                        .userId(user1.getId())
+                        .filmId(film2.getId())
+                        .build());
+
+        Review review4 = reviewStorage.create(
+                Review.builder()
+                        .content("До сих выглядит новаторски, скорее бы вторая часть!")
+                        .isPositive(true)
+                        .userId(user2.getId())
+                        .filmId(film2.getId())
+                        .build());
+
+        reviewDislikeStorage.setDislike(review1.getReviewId(), user2.getId());
+        reviewDislikeStorage.setDislike(review1.getReviewId(), user3.getId());
+        reviewLikeStorage.setLike(review2.getReviewId(), user3.getId());
+        reviewLikeStorage.setLike(review3.getReviewId(), user2.getId());
+        reviewLikeStorage.setLike(review4.getReviewId(), user1.getId());
+        reviewLikeStorage.setLike(review4.getReviewId(), user3.getId());
+
+        List<Review> expected = List.of(
+                reviewStorage.getById(review4.getReviewId()),
+                reviewStorage.getById(review2.getReviewId()),
+                reviewStorage.getById(review3.getReviewId()),
+                reviewStorage.getById(review1.getReviewId())
+        );
+        assertEquals(expected, reviewStorage.getAllReviews(null, 10));
     }
 }

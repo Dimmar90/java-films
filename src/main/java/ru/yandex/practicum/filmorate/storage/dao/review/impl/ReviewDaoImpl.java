@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,13 +57,14 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public List<Review> getAllReviews(Integer filmId, Integer count) {
-        if (jdbcTemplate.queryForList("SELECT * FROM reviews", Review.class).isEmpty()) return new ArrayList<>();
-
-        String str = filmId != null ? "WHERE film_id = ? " : "";
-        String sqlQuery = "SELECT * FROM reviews " +
-                str +
+        String sqlQuery = "SELECT * FROM reviews %s" +
                 "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToReview);
+
+        if (filmId != null) {
+            return jdbcTemplate.query(String.format(sqlQuery, "WHERE film_id = ? "), this::mapRowToReview, filmId, count);
+        } else {
+            return jdbcTemplate.query(String.format(sqlQuery, ""), this::mapRowToReview, count);
+        }
     }
 
     @Override

@@ -21,12 +21,4 @@ public class Review {
     private Integer filmId;
     @Setter(AccessLevel.NONE)
     private int useful;
-
-    public void increaseUseful() {
-        useful++;
-    }
-
-    public void decreaseUseful() {
-        useful--;
-    }
 }

@@ -59,28 +59,24 @@ public class DBReviewService {
     public void addLike(Integer id, Integer userId) {
         checkExistReviewAndUser(id, userId);
         reviewLikeDao.setLike(id, userId);
-        reviewDao.getById(id).increaseUseful();
         log.info("User ID = {} liked review ID = {}", id, userId);
     }
 
     public void addDislike(Integer id, Integer userId) {
         checkExistReviewAndUser(id, userId);
         reviewDislikeDao.setDislike(id, userId);
-        reviewDao.getById(id).decreaseUseful();
         log.info("User ID = {} disliked review ID = {}", id, userId);
     }
 
     public void deleteLike(Integer id, Integer userId) {
         checkExistReviewAndUser(id, userId);
         reviewLikeDao.deleteLike(id, userId);
-        reviewDao.getById(id).decreaseUseful();
         log.info("User ID = {} deleted like review ID = {}", id, userId);
     }
 
     public void deleteDislike(Integer id, Integer userId) {
         checkExistReviewAndUser(id, userId);
         reviewDislikeDao.deleteDislike(id, userId);
-        reviewDao.getById(id).increaseUseful();
         log.info("User ID = {} deleted dislike review ID = {}", id, userId);
     }
 
