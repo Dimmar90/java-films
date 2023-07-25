@@ -88,9 +88,10 @@ public class DBReviewService {
         if (id == null || !reviewDao.checkReviewExist(id)) {
             throw new NotFoundException("Can't delete a review with ID = null");
         }
+        eventDao.addEvent(getReview(id).getUserId(),"REVIEW","REMOVE",getReview(id).getFilmId()); // добавляю событие в ленту
         reviewDao.deleteById(id);
         log.info("Deleted review ID = {}", id);
-        eventDao.addEvent(id,"REVIEW","REMOVE",getReview(id).getFilmId()); // добавляю событие в ленту
+
     }
 
     private void checkExistReviewAndUser(Integer id, Integer userId) {
