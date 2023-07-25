@@ -53,6 +53,7 @@ class FilmDaoImplTest {
                 .duration(180)
                 .releaseDate(LocalDate.of(2005, 6, 5))
                 .mpa(new Mpa(1, "G"))
+                .directors(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
     }
@@ -75,6 +76,7 @@ class FilmDaoImplTest {
                         .duration(150)
                         .releaseDate(LocalDate.of(2005, 6, 5))
                         .mpa(new Mpa(1, "G"))
+                        .directors(new HashSet<>())
                         .genres(new HashSet<>())
                         .build()
         );
@@ -95,6 +97,7 @@ class FilmDaoImplTest {
                         .duration(150)
                         .releaseDate(LocalDate.of(2001, 3, 8))
                         .mpa(new Mpa(1, "G"))
+                        .directors(new HashSet<>())
                         .genres(new HashSet<>())
                         .build()
         );
@@ -177,6 +180,7 @@ class FilmDaoImplTest {
                         .duration(180)
                         .releaseDate(LocalDate.of(2009, 12, 10))
                         .mpa(new Mpa(2, "PG"))
+                        .directors(new HashSet<>())
                         .genres(new HashSet<>())
                         .build()
         );
@@ -188,6 +192,7 @@ class FilmDaoImplTest {
                         .duration(130)
                         .releaseDate(LocalDate.of(2003, 10, 8))
                         .mpa(new Mpa(1, "G"))
+                        .directors(new HashSet<>())
                         .genres(new HashSet<>())
                         .build()
         );
@@ -269,6 +274,7 @@ class FilmDaoImplTest {
                         .duration(150)
                         .releaseDate(LocalDate.of(2001, 3, 8))
                         .mpa(new Mpa(1, "G"))
+                        .directors(new HashSet<>())
                         .genres(new HashSet<>())
                         .build()
         );
