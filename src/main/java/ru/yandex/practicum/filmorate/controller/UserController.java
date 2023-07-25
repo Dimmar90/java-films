@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.service.DBUserService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.Set;
 
 @RestController

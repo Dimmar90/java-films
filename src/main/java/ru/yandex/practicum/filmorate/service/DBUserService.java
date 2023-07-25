@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
 import java.util.List;
-import java.util.TreeSet;
 import java.util.*;
 
 @Service
@@ -103,7 +102,6 @@ public class DBUserService {
         return userDaoImpl.getRecommendationsFilms(id, dbFilmService);
     }
 
-    public TreeSet<Event> getEventFeed(Integer userId) {
     public List<Event> getEventFeed(Integer userId) {
         userDao.checkUserExist(userId);
         log.info("Get feed of the user with ID= {}", userId);
