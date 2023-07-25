@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.service.DBFilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -59,7 +58,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorsFilms(@PathVariable("directorId") Integer directorId, @RequestParam String sortBy) {
-        return filmService.getDirectorsFilms(directorId,sortBy);
+        return filmService.getDirectorsFilms(directorId, sortBy);
     }
 
     @DeleteMapping("/{filmId}")
