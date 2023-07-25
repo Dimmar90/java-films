@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dao.user.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
+import java.util.List;
 import java.util.*;
 
 @Service
@@ -19,11 +22,13 @@ import java.util.*;
 public class DBUserService {
     private final UserDao userDao;
     private final FriendDao friendDao;
+    private final EventDao eventDao;
 
     @Autowired
-    public DBUserService(@Qualifier("userDaoImpl") UserDao userDao, FriendDao friendDao) {
+    public DBUserService(@Qualifier("userDaoImpl") UserDao userDao, FriendDao friendDao, EventDao eventDao) {
         this.userDao = userDao;
         this.friendDao = friendDao;
+        this.eventDao = eventDao;
     }
 
     public User create(User user) {
@@ -48,6 +53,7 @@ public class DBUserService {
         }
         friendDao.addFriend(userId, friendId);
         log.info("User with ID = {} ADDED user with ID = {} as a friend", userId, friendId);
+        eventDao.addEvent(userId, "FRIEND", "ADD", friendId); // добавляю событие в ленту
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
@@ -57,6 +63,7 @@ public class DBUserService {
         }
         friendDao.deleteFriend(userId, friendId);
         log.info("User with ID = {} REMOVED from friends of user with ID = {}", friendId, userId);
+        eventDao.addEvent(userId, "FRIEND", "REMOVE", friendId); // удаляю событие из ленты
     }
 
     public User getUser(Integer id) {
@@ -93,5 +100,11 @@ public class DBUserService {
         log.info("Get a RecommendationsFilms for user with ID = {}", id);
         UserDaoImpl userDaoImpl = (UserDaoImpl) userDao;
         return userDaoImpl.getRecommendationsFilms(id, dbFilmService);
+    }
+
+    public List<Event> getEventFeed(Integer userId) {
+        userDao.checkUserExist(userId);
+        log.info("Get feed of the user with ID= {}", userId);
+        return eventDao.getEventFeed(userId);
     }
 }

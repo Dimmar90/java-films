@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.dao.film.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmLikesDao;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.user.EventDao;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,15 +26,17 @@ public class DBFilmService {
     private final GenreDao genreDao;
     private final FilmLikesDao filmLikesDao;
     private final DirectorDao directorDao;
+    private final EventDao eventDao;
 
     @Autowired
     public DBFilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, DBUserService userService,
-                         GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao) {
+                         GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao, EventDao eventDao) {
         this.filmDao = filmDao;
         this.userService = userService;
         this.genreDao = genreDao;
         this.filmLikesDao = filmLikesDao;
         this.directorDao = directorDao;
+        this.eventDao = eventDao;
     }
 
     public Film create(Film film) {
@@ -83,6 +86,7 @@ public class DBFilmService {
         userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.like(filmId, userId);
         log.info("Film with ID = {} was LIKED by user with ID = {}", filmId, userId);
+        eventDao.addEvent(userId, "LIKE", "ADD", filmId); // добавляю событие в ленту
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
@@ -90,6 +94,7 @@ public class DBFilmService {
         userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.unlike(filmId, userId);
         log.info("Film with ID = {} was UNLIKED by user with ID = {}", filmId, userId);
+        eventDao.addEvent(userId, "LIKE", "REMOVE", filmId); // удаляю событие из ленты
     }
 
     public Film getFilm(Integer id) {

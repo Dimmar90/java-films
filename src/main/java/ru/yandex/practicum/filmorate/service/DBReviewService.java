@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.dao.film.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDislikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewLikeDao;
+import ru.yandex.practicum.filmorate.storage.dao.user.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class DBReviewService {
     private final ReviewDislikeDao reviewDislikeDao;
     private final FilmDao filmDao;
     private final UserDao userDao;
+    private final EventDao eventDao;
 
     public Review create(Review review) {
         userDao.checkUserExist(review.getUserId());
@@ -29,6 +31,7 @@ public class DBReviewService {
         review = reviewDao.create(review);
 
         log.info("Review {} has been CREATED", review);
+        eventDao.addEvent(review.getUserId(), "REVIEW", "ADD", review.getReviewId()); // добавляю событие в ленту
         return review;
     }
 
@@ -38,6 +41,7 @@ public class DBReviewService {
         }
         review = reviewDao.update(review);
         log.info("Review {} has been UPDATED", review);
+        eventDao.addEvent(review.getUserId(), "REVIEW", "UPDATE", review.getFilmId()); // добавляю событие в ленту
         return review;
     }
 
@@ -84,8 +88,10 @@ public class DBReviewService {
         if (id == null || !reviewDao.checkReviewExist(id)) {
             throw new NotFoundException("Can't delete a review with ID = null");
         }
+        eventDao.addEvent(getReview(id).getUserId(), "REVIEW", "REMOVE", getReview(id).getFilmId()); // добавляю событие в ленту
         reviewDao.deleteById(id);
         log.info("Deleted review ID = {}", id);
+
     }
 
     private void checkExistReviewAndUser(Integer id, Integer userId) {
