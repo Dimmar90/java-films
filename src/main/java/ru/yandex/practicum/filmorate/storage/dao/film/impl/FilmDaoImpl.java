@@ -182,10 +182,10 @@ public class FilmDaoImpl implements FilmDao {
     @Override
     public List<Film> search(String keyWord, String whereSearch) {
         String[] s = whereSearch.split(",");
-        if(s.length == 2) {
+        if (s.length == 2) {
             return searchByDirAndTitle(keyWord);
         } else {
-            if(s[0].equals("director")) {
+            if (s[0].equals("director")) {
                 return searchByDirector(keyWord);
             } else {
                 return searchByTitle(keyWord);
