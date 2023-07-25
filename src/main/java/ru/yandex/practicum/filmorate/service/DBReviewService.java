@@ -31,7 +31,7 @@ public class DBReviewService {
         review = reviewDao.create(review);
 
         log.info("Review {} has been CREATED", review);
-        eventDao.addEvent(review.getUserId(),"REVIEW","ADD",review.getFilmId()); // добавляю событие в ленту
+        eventDao.addEvent(review.getUserId(),"REVIEW","ADD",review.getReviewId()); // добавляю событие в ленту
         return review;
     }
 
