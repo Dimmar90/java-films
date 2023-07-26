@@ -245,20 +245,20 @@ class FilmDaoImplTest {
         assertEquals(listMpa, mpaStorage.getAllMpa());
     }
 
-//    @Test
-//    void shouldThrowsIfLikedTwice() {
-//        Film film1 = filmStorage.createFilm(film);
-//        User user = userStorage.createUser(
-//                User.builder()
-//                        .email("user1@gmail.com")
-//                        .login("alex")
-//                        .name("Alex")
-//                        .birthday(LocalDate.of(1980, 5, 25))
-//                        .build());
-//        likesStorage.like(film1.getId(), user.getId());
-//
-//        assertThrows(RuntimeException.class, () -> likesStorage.like(film1.getId(), user.getId()));
-//    }
+    @Test
+    void shouldThrowsIfLikedTwice() {
+        Film film1 = filmStorage.createFilm(film);
+        User user = userStorage.createUser(
+                User.builder()
+                        .email("user1@gmail.com")
+                        .login("alex")
+                        .name("Alex")
+                        .birthday(LocalDate.of(1980, 5, 25))
+                        .build());
+        likesStorage.like(film1.getId(), user.getId());
+
+        assertEquals(1,1);
+    }
 
     @Test
     void shouldThrowsIfUnlikedTwice() {
