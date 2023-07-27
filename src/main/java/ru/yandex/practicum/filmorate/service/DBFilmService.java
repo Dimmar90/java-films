@@ -143,12 +143,12 @@ public class DBFilmService {
 
     public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
-            directorDao.deleteFilmFromDirector(film.getId());
+            directorDao.deleteDirectorFromFilm(film.getId());
             film.setDirectors(new HashSet<>());
         } else {
             for (Director director : film.getDirectors()) {
                 if (directorDao.checkDirectorExist(director.getId())) {
-                    directorDao.addFilmToDirector(director.getId(), film.getId());
+                    directorDao.addDirectorToFilm(director.getId(), film.getId());
                 }
             }
             directorDao.addDirectorsListToFilm(film);

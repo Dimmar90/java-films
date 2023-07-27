@@ -28,12 +28,12 @@ public class DirectorsController {
 
     @GetMapping
     public List<Director> getDirectors() {
-        return dbDirectorService.getDirectors();
+        return dbDirectorService.getAll();
     }
 
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable("id") Integer directorId) {
-        return dbDirectorService.getDirector(directorId);
+        return dbDirectorService.getById(directorId);
     }
 
     @DeleteMapping("/{id}")

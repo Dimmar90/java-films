@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component()
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class DirectorDaoImpl implements DirectorDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Director createDirector(Director director) {
+    public Director create(Director director) {
         String sqlQuery = "INSERT INTO directors (name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -39,37 +40,40 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public Director updateDirector(Director director) {
+    public Director update(Director director) {
         String sqlQuery = "UPDATE directors SET name = ? WHERE director_id = ?";
         jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
         return director;
     }
 
     @Override
-    public List<Director> findAllDirectors() {
+    public List<Director> findAll() {
         String sqlQuery = "SELECT * FROM directors";
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector);
     }
 
     @Override
-    public Director findDirectorById(Integer id) {
-        String sqlQuery = "SELECT * FROM directors WHERE director_id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
+    public Optional<Director> findById(Integer id) {
+        if(checkDirectorExist(id)) {
+            String sqlQuery = "SELECT * FROM directors WHERE director_id = ?";
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id));
+        }
+        return Optional.empty();
     }
 
     @Override
-    public void deleteDirector(Integer id) {
+    public void delete(Integer id) {
         jdbcTemplate.update("DELETE FROM directors WHERE director_id = ?", id);
     }
 
     @Override
-    public void addFilmToDirector(Integer directorId, Integer filmId) {
+    public void addDirectorToFilm(Integer directorId, Integer filmId) {
         String sqlQuery = "INSERT INTO film_directors (director_id,film_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, directorId, filmId);
     }
 
     @Override
-    public void deleteFilmFromDirector(Integer filmId) {
+    public void deleteDirectorFromFilm(Integer filmId) {
         String sqlQuery = "DELETE FROM film_directors WHERE film_id =?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
