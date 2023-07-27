@@ -246,7 +246,7 @@ class FilmDaoImplTest {
     }
 
     @Test
-    void shouldThrowsIfLikedTwice() {
+    void shouldNotThrowsIfLikedTwice() {
         Film film1 = filmStorage.createFilm(film);
         User user = userStorage.createUser(
                 User.builder()
@@ -257,7 +257,7 @@ class FilmDaoImplTest {
                         .build());
         likesStorage.like(film1.getId(), user.getId());
 
-        assertEquals(1,1);
+        assertDoesNotThrow(() -> likesStorage.like(film1.getId(), user.getId()));
     }
 
     @Test

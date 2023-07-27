@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS film_likes (
         film_id INTEGER REFERENCES films(id) ON delete CASCADE,
         user_id INTEGER REFERENCES users(id) ON delete CASCADE,
         PRIMARY KEY(film_id, user_id)
-        --scores INTEGER CHECK(scores >= 1 AND scores <=10)
 );
 
 -- Таблица с режиссерами
