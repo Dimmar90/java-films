@@ -94,7 +94,7 @@ GROUP BY topfilms ORDER BY COUNT(lk.user_id) DESC LIMIT 10;
 
 ## Тесты API-запросов
 Проверка эндпоинтов выполняется с использованием 
-[json-коллекций](https://github.com/yandex-praktikum/java-filmorate/blob/add-common-films/postman/sprint.json),
-которые необходимо импортировать в приложение для тестирования API, например Postman.
+[json-коллекции](src/main/resources/testAPI.json),
+которую необходимо импортировать в приложение для тестирования API, например Postman.
 Предварительно необходимо запустить приложение в классе `FilmorateApplication`.
 
