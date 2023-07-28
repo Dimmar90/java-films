@@ -15,7 +15,7 @@ import java.util.List;
 public class GenreService {
     private final GenreDao genreDao;
 
-    public Genre getById(Integer id) throws NotFoundException {
+    public Genre getById(Long id) throws NotFoundException {
         log.info("Get a genre with ID = {}", id);
         return genreDao.findById(id);
     }

@@ -65,16 +65,16 @@ class UserDaoImplTest {
         userStorage.create(user);
         userStorage.update(
                 User.builder()
-                        .id(1)
+                        .id(1L)
                         .email("user1@gmail.com")
                         .login("alex")
                         .name("Alex")
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build()
         );
-        assertEquals("alex", userStorage.findById(1).getLogin());
-        assertEquals("Alex", userStorage.findById(1).getName());
-        Set<ConstraintViolation<User>> violations = validator.validate(userStorage.findById(1));
+        assertEquals("alex", userStorage.findById(1L).getLogin());
+        assertEquals("Alex", userStorage.findById(1L).getName());
+        Set<ConstraintViolation<User>> violations = validator.validate(userStorage.findById(1L));
         assertTrue(violations.isEmpty());
     }
 
@@ -108,7 +108,7 @@ class UserDaoImplTest {
     @Test
     void shouldGetUserById() {
         userStorage.create(user);
-        assertEquals(user, userStorage.findById(1));
+        assertEquals(user, userStorage.findById(1L));
     }
 
     @Test
@@ -117,7 +117,7 @@ class UserDaoImplTest {
 
         final NotFoundException e = assertThrows(
                 NotFoundException.class,
-                () -> userStorage.checkExist(2)
+                () -> userStorage.checkExist(2L)
         );
         assertEquals("User ID = 2 does not exist", e.getMessage());
     }
@@ -231,7 +231,7 @@ class UserDaoImplTest {
     void shouldDeleteUserById() {
         userStorage.create(user);
         List<User> expectedUsers = userStorage.findAll();
-        user.setId(1);
+        user.setId(1L);
 
         assertThat(expectedUsers).hasSize(1).contains(user);
         userStorage.delete(user.getId());
@@ -296,17 +296,17 @@ class UserDaoImplTest {
         );
         List<Film> films = filmStorage.findAll();
 
-        filmLikesDao.like(1, 1);
+        filmLikesDao.like(1L, 1L);
 
-        filmLikesDao.like(1, 2);
-        filmLikesDao.like(2, 2);
-        filmLikesDao.like(3, 2);
+        filmLikesDao.like(1L, 2L);
+        filmLikesDao.like(2L, 2L);
+        filmLikesDao.like(3L, 2L);
 
-        filmLikesDao.like(1, 3);
-        filmLikesDao.like(2, 3);
+        filmLikesDao.like(1L, 3L);
+        filmLikesDao.like(2L, 3L);
 
-        Set<Film> listFilms = userDaoImpl.findRecommendationsFilms(1, dbFilmService);
-        List<Integer> listId = new ArrayList<>();
+        Set<Film> listFilms = userDaoImpl.findRecommendationsFilms(1L, dbFilmService);
+        List<Long> listId = new ArrayList<>();
         for (Film film : listFilms) {
             listId.add(film.getId());
         }

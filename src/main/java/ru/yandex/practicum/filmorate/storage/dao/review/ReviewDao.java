@@ -9,11 +9,11 @@ public interface ReviewDao {
 
     Review update(Review review);
 
-    Review findById(Integer id);
+    Review findById(Long id);
 
-    List<Review> findAll(Integer filmId, Integer count);
+    List<Review> findAll(Long filmId, Integer count);
 
-    void delete(Integer id);
+    void delete(Long id);
 
-    boolean checkExist(Integer id);
+    boolean checkExist(Long id);
 }

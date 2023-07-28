@@ -81,7 +81,7 @@ public class FilmService {
         return filmDao.update(film);
     }
 
-    public void addLike(Integer filmId, Integer userId) {
+    public void addLike(Long filmId, Long userId) {
         filmDao.checkExist(filmId);
         userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.like(filmId, userId);
@@ -89,7 +89,7 @@ public class FilmService {
         eventDao.add(userId, "LIKE", "ADD", filmId); // добавляю событие в ленту
     }
 
-    public void deleteLike(Integer filmId, Integer userId) {
+    public void deleteLike(Long filmId, Long userId) {
         filmDao.checkExist(filmId);
         userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.unlike(filmId, userId);
@@ -97,7 +97,7 @@ public class FilmService {
         eventDao.add(userId, "LIKE", "REMOVE", filmId); // удаляю событие из ленты
     }
 
-    public Film getById(Integer id) {
+    public Film getById(Long id) {
         filmDao.checkExist(id);
         Film film = filmDao.findById(id);
         film.setGenres(genreDao.findFilmGenres(film.getId()));
@@ -116,7 +116,7 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> getDirectorsFilms(Integer directorsId, String sortBy) {
+    public List<Film> getDirectorsFilms(Long directorsId, String sortBy) {
         List<Film> sortedDirectorsFilms = new ArrayList<>();
         if (sortBy.equals("likes")) {
             sortedDirectorsFilms = getSortedBy(directorsId, filmDao.findDirectorsFilmsSortedByRate(directorsId));
@@ -126,7 +126,7 @@ public class FilmService {
         return sortedDirectorsFilms;
     }
 
-    public List<Film> getSortedBy(Integer directorsId, List<Film> sortedListOfFilms) {
+    public List<Film> getSortedBy(Long directorsId, List<Film> sortedListOfFilms) {
         directorDao.checkExist(directorsId);
         List<Film> directorFilms = new ArrayList<>();
         for (Film film : sortedListOfFilms) {
@@ -155,13 +155,13 @@ public class FilmService {
         }
     }
 
-    public void delete(Integer filmId) {
+    public void delete(Long filmId) {
         filmDao.checkExist(filmId);
         filmDao.delete(filmId);
         log.info("Delete film from films with ID = {}", filmId);
     }
 
-    public List<Film> getCommon(Integer userId, Integer friendId) {
+    public List<Film> getCommon(Long userId, Long friendId) {
         userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
         userService.getById(friendId); // метод getUser() выбросит исключение, если friendId не существует
         log.info("Get common films of users with ID = {} and ID = {}", userId, friendId);

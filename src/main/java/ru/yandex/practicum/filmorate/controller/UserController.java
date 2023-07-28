@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+    public void addFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
         userService.addFriend(id, friendId);
     }
 
@@ -43,37 +43,37 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable("id") Integer userId) {
+    public User getUser(@PathVariable("id") Long userId) {
         return userService.getById(userId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getUserFriends(@PathVariable("id") Integer userId) {
+    public List<User> getUserFriends(@PathVariable("id") Long userId) {
         return userService.getFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable("id") Integer id, @PathVariable("otherId") Integer otherId) {
+    public List<User> getCommonFriends(@PathVariable("id") Long id, @PathVariable("otherId") Long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
     @GetMapping("/{id}/recommendations")  //id usera которому рекомендуются фильмы
-    public Set<Film> getRecommendationsFilms(@PathVariable("id") Integer id) {
+    public Set<Film> getRecommendationsFilms(@PathVariable("id") Long id) {
         return userService.getRecommendedFilms(id, dbFilmService);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable("userId") Integer userId) {
+    public void deleteUser(@PathVariable("userId") Long userId) {
         userService.delete(userId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+    public void deleteFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/feed")
-    public List<Event> getEventFeed(@PathVariable("id") Integer userId) {
+    public List<Event> getEventFeed(@PathVariable("id") Long userId) {
         return userService.getUserFeed(userId);
     }
 }

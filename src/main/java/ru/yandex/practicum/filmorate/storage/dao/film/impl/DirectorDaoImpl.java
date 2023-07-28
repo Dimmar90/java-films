@@ -35,7 +35,7 @@ public class DirectorDaoImpl implements DirectorDao {
             return ps;
         }, keyHolder);
 
-        director.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        director.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return director;
     }
 
@@ -53,7 +53,7 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public Optional<Director> findById(Integer id) {
+    public Optional<Director> findById(Long id) {
         if(checkExist(id)) {
             String sqlQuery = "SELECT * FROM directors WHERE director_id = ?";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id));
@@ -62,18 +62,18 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM directors WHERE director_id = ?", id);
     }
 
     @Override
-    public void addToFilm(Integer directorId, Integer filmId) {
+    public void addToFilm(Long directorId, Long filmId) {
         String sqlQuery = "INSERT INTO film_directors (director_id,film_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, directorId, filmId);
     }
 
     @Override
-    public void deleteFromFilm(Integer filmId) {
+    public void deleteFromFilm(Long filmId) {
         String sqlQuery = "DELETE FROM film_directors WHERE film_id =?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
@@ -89,7 +89,7 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public boolean checkExist(Integer id) throws NotFoundException {
+    public boolean checkExist(Long id) throws NotFoundException {
         String sqlQuery = "SELECT director_id FROM directors WHERE director_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -100,7 +100,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
         return Director.builder()
-                .id(rs.getInt("director_id"))
+                .id(rs.getLong("director_id"))
                 .name(rs.getString("name"))
                 .build();
     }

@@ -38,13 +38,13 @@ public class DirectorService {
         return directorDao.findAll();
     }
 
-    public Director getById(Integer id) {
+    public Director getById(Long id) {
         log.info("Get a director with ID = {}", id);
         return directorDao.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Director ID = %d does not exist", id)));
     }
 
-    public void deleteDirector(Integer id) {
+    public void deleteDirector(Long id) {
         directorDao.checkExist(id);
         log.info("Deleted director with ID = {}", id);
         directorDao.delete(id);

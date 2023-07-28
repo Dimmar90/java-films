@@ -19,7 +19,7 @@ public class MpaController {
     private final MpaService mpaService;
 
     @GetMapping("/{id}")
-    public Mpa getMpa(@PathVariable int id) {
+    public Mpa getMpa(@PathVariable Integer id) {
         return mpaService.getById(id);
     }
 

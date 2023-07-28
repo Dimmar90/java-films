@@ -40,7 +40,7 @@ public class UserDaoImpl implements UserDao {
             return ps;
         }, keyHolder);
 
-        user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 
@@ -64,17 +64,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User findById(Integer id) {
+    public User findById(Long id) {
         String sqlQuery = "SELECT * FROM users WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
     }
 
     @Override
-    public void delete(Integer userId) {
+    public void delete(Long userId) {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
     }
 
-    public Set<Film> findRecommendationsFilms(Integer id, FilmService dbFilmService) {
+    public Set<Film> findRecommendationsFilms(Long id, FilmService dbFilmService) {
         String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
                 "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
                 "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
@@ -86,14 +86,14 @@ public class UserDaoImpl implements UserDao {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
         Set<Film> recomendatedFilms = new HashSet<>();
         while (rowSet.next()) {
-            Film film = dbFilmService.getById(rowSet.getInt("FILM_ID"));
+            Film film = dbFilmService.getById(rowSet.getLong("FILM_ID"));
             recomendatedFilms.add(film);
         }
         return recomendatedFilms;
     }
 
     @Override
-    public boolean checkExist(Integer id) throws NotFoundException {
+    public boolean checkExist(Long id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -104,7 +104,7 @@ public class UserDaoImpl implements UserDao {
 
     private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         return User.builder()
-                .id(rs.getInt("id"))
+                .id(rs.getLong("id"))
                 .email(rs.getString("email"))
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))

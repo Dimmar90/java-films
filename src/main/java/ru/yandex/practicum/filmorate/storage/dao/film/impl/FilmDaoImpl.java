@@ -39,7 +39,7 @@ public class FilmDaoImpl implements FilmDao {
             return ps;
         }, id);
 
-        film.setId(Objects.requireNonNull(id.getKey()).intValue());
+        film.setId(Objects.requireNonNull(id.getKey()).longValue());
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
         film.setMpa(mpa);
@@ -72,12 +72,12 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public Film findById(Integer id) {
+    public Film findById(Long id) {
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
-    public void delete(Integer filmId) {
+    public void delete(Long filmId) {
         jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
     }
 
@@ -101,7 +101,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findCommon(Integer userId, Integer friendId) {
+    public List<Film> findCommon(Long userId, Long friendId) {
         String sqlQuery = "SELECT f.* FROM films f " +
                 "JOIN film_likes fl1 ON fl1.film_id = f.id " +
                 "JOIN film_likes fl2 ON fl2.film_id = f.id " +
@@ -112,7 +112,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
+    public List<Film> findDirectorsFilmsSortedByRate(Long directorId) {
         String sql = "SELECT f.id, f.name, f.description, f.duration, " +
                 "f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
                 "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
@@ -124,7 +124,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findDirectorsFilmsSortedByYears(Integer directorId) {
+    public List<Film> findDirectorsFilmsSortedByYears(Long directorId) {
         String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id " +
                 "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
                 "WHERE fd.director_id =? " +
@@ -133,7 +133,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public boolean checkExist(Integer id) throws NotFoundException {
+    public boolean checkExist(Long id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -146,7 +146,7 @@ public class FilmDaoImpl implements FilmDao {
         int mpaId = rs.getInt("mpa_id");
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
-        int filmId = rs.getInt("id");
+        Long filmId = rs.getLong("id");
         String sql = "SELECT genre_id, name FROM genres WHERE genre_id IN" +
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         Set<Genre> genres = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
@@ -178,7 +178,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
-        return new Director(rs.getInt("director_id"), rs.getString("name"));
+        return new Director(rs.getLong("director_id"), rs.getString("name"));
     }
 
     @Override

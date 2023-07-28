@@ -28,38 +28,38 @@ public class ReviewController {
     }
 
     @GetMapping("/{reviewId}")
-    public Review getReview(@PathVariable("reviewId") Integer id) {
+    public Review getReview(@PathVariable("reviewId") Long id) {
         return dbReviewService.getById(id);
     }
 
     @GetMapping // ?filmId={filmId}&count={count}
-    public List<Review> getALLReviews(@RequestParam(value = "filmId", required = false) Integer filmId,
+    public List<Review> getALLReviews(@RequestParam(value = "filmId", required = false) Long filmId,
                                    @Positive @RequestParam(value = "count", defaultValue = "10") Integer count) {
         return dbReviewService.getAll(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void addLike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         dbReviewService.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void addDislike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         dbReviewService.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void deleteLike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         dbReviewService.deleteLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void deleteDislike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void deleteDislike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         dbReviewService.deleteDislike(id, userId);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Integer id) {
+    public void delete(@PathVariable("id") Long id) {
         dbReviewService.delete(id);
     }
 }

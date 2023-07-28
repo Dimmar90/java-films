@@ -13,15 +13,15 @@ public interface DirectorDao {
 
     List<Director> findAll();
 
-    Optional<Director> findById(Integer id);
+    Optional<Director> findById(Long id);
 
-    void delete(Integer id);
+    void delete(Long id);
 
-    boolean checkExist(Integer id);
+    boolean checkExist(Long id);
 
-    void addToFilm(Integer directorId, Integer filmId);
+    void addToFilm(Long directorId, Long filmId);
 
-    void deleteFromFilm(Integer filmId);
+    void deleteFromFilm(Long filmId);
 
     void addDirectorsToFilm(Film film);
 }

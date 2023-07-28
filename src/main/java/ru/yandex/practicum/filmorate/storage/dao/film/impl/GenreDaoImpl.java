@@ -20,20 +20,20 @@ public class GenreDaoImpl implements GenreDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void add(Integer filmId, Integer genreId) {
+    public void add(Long filmId, Integer genreId) {
         String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, filmId, genreId);
     }
 
     @Override
-    public Set<Genre> findFilmGenres(Integer filmId) {
+    public Set<Genre> findFilmGenres(Long filmId) {
         String sql = "SELECT genre_id, name FROM genres WHERE genre_id IN" +
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
     }
 
     @Override
-    public Genre findById(Integer id) {
+    public Genre findById(Long id) {
         String sql = "SELECT * FROM genres WHERE genre_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
         if (rowSet.next()) {
@@ -50,7 +50,7 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void deleteFilmGenres(Integer filmId) {
+    public void deleteFilmGenres(Long filmId) {
         String sql = "DELETE FROM film_genres WHERE film_id = ?";
         jdbcTemplate.update(sql, filmId);
     }

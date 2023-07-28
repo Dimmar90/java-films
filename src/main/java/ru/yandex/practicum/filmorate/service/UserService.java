@@ -45,7 +45,7 @@ public class UserService {
         return userDao.update(user);
     }
 
-    public void addFriend(Integer userId, Integer friendId) {
+    public void addFriend(Long userId, Long friendId) {
         if (getFriends(userId).contains(getById(friendId))) {
             throw new AlreadyExistException(String.format(
                     "User with ID = %d is ALREADY friends with user with ID = %d", friendId, userId));
@@ -55,7 +55,7 @@ public class UserService {
         eventDao.add(userId, "FRIEND", "ADD", friendId); // добавляю событие в ленту
     }
 
-    public void deleteFriend(Integer userId, Integer friendId) {
+    public void deleteFriend(Long userId, Long friendId) {
         if (!getFriends(userId).contains(getById(friendId))) {
             throw new NotFoundException(
                     String.format("Deleted user with ID = %d was NOT FOUND in friends", friendId));
@@ -65,7 +65,7 @@ public class UserService {
         eventDao.add(userId, "FRIEND", "REMOVE", friendId); // удаляю событие из ленты
     }
 
-    public User getById(Integer id) {
+    public User getById(Long id) {
         userDao.checkExist(id);
         log.info("Get a user with ID = {}", id);
         return userDao.findById(id);
@@ -75,33 +75,33 @@ public class UserService {
         return userDao.findAll();
     }
 
-    public List<User> getFriends(Integer id) {
+    public List<User> getFriends(Long id) {
         userDao.checkExist(id);
         log.info("Get friends of the user with ID= {}", id);
         return friendDao.findAll(id);
     }
 
-    public List<User> getCommonFriends(Integer userId, Integer friendId) {
+    public List<User> getCommonFriends(Long userId, Long friendId) {
         userDao.checkExist(userId);
         userDao.checkExist(friendId);
         log.info("Get common friends of users with ID = {} and ID = {}", userId, friendId);
         return friendDao.findCommon(userId, friendId);
     }
 
-    public void delete(Integer userId) {
+    public void delete(Long userId) {
         userDao.checkExist(userId);
         userDao.delete(userId);
         log.info("Delete user from users with ID = {}", userId);
     }
 
-    public Set<Film> getRecommendedFilms(Integer id, FilmService dbFilmService) {
+    public Set<Film> getRecommendedFilms(Long id, FilmService dbFilmService) {
         userDao.checkExist(id);
         log.info("Get a recommended films for user with ID = {}", id);
         UserDaoImpl userDaoImpl = (UserDaoImpl) userDao;
         return userDaoImpl.findRecommendationsFilms(id, dbFilmService);
     }
 
-    public List<Event> getUserFeed(Integer userId) {
+    public List<Event> getUserFeed(Long userId) {
         userDao.checkExist(userId);
         log.info("Get feed of the user with ID= {}", userId);
         return eventDao.findUserFeed(userId);

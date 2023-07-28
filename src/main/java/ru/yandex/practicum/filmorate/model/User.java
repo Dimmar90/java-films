@@ -21,7 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class User {
-    private Integer id;
+    private Long id;
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email must be completed")
     private String email;

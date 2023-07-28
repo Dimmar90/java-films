@@ -45,13 +45,13 @@ public class ReviewService {
         return review;
     }
 
-    public Review getById(Integer id) {
+    public Review getById(Long id) {
         reviewDao.checkExist(id);
         log.info("Get a review with ID = {}", id);
         return reviewDao.findById(id);
     }
 
-    public List<Review> getAll(Integer filmId, Integer count) {
+    public List<Review> getAll(Long filmId, Integer count) {
         if (filmId != null) { // Если передан id фильма - получаем все отзывы этого фильма
             filmDao.checkExist(filmId);
         }
@@ -60,35 +60,35 @@ public class ReviewService {
         return reviews;
     }
 
-    public void addLike(Integer id, Integer userId) {
+    public void addLike(Long id, Long userId) {
         reviewDao.checkExist(id);
         userDao.checkExist(userId);
         reviewLikeDao.add(id, userId);
         log.info("User ID = {} liked review ID = {}", id, userId);
     }
 
-    public void addDislike(Integer id, Integer userId) {
+    public void addDislike(Long id, Long userId) {
         reviewDao.checkExist(id);
         userDao.checkExist(userId);
         reviewDislikeDao.add(id, userId);
         log.info("User ID = {} disliked review ID = {}", id, userId);
     }
 
-    public void deleteLike(Integer id, Integer userId) {
+    public void deleteLike(Long id, Long userId) {
         reviewDao.checkExist(id);
         userDao.checkExist(userId);
         reviewLikeDao.delete(id, userId);
         log.info("User ID = {} deleted like review ID = {}", id, userId);
     }
 
-    public void deleteDislike(Integer id, Integer userId) {
+    public void deleteDislike(Long id, Long userId) {
         reviewDao.checkExist(id);
         userDao.checkExist(userId);
         reviewDislikeDao.delete(id, userId);
         log.info("User ID = {} deleted dislike review ID = {}", id, userId);
     }
 
-    public void delete(Integer id) {
+    public void delete(Long id) {
         reviewDao.checkExist(id);
         eventDao.add(getById(id).getUserId(), "REVIEW", "REMOVE", getById(id).getFilmId()); // добавляю событие в ленту
         reviewDao.delete(id);
