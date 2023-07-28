@@ -5,8 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmLikesDao;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class FilmLikesDaoImpl implements FilmLikesDao {
