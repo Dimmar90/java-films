@@ -75,20 +75,18 @@ public class UserDaoImpl implements UserDao {
     }
 
     public Set<Film> findRecommendationsFilms(Long id, FilmService dbFilmService) {
-        String sqlQuery = "SELECT DISTINCT fl.film_id FROM film_likes fl " +
-                "JOIN (SELECT user_id, COUNT(user_id) AS likes_count FROM film_likes WHERE film_id IN " +
-                         "(SELECT film_id FROM film_likes WHERE user_id = ?) " +
-                     "AND user_id <> ? GROUP BY user_id) " +
-                     "UserLikesCount ON fl.user_id = UserLikesCount.user_id " +
-                "JOIN (SELECT COUNT(user_id) AS max_likes FROM film_likes WHERE film_id IN " +
-                          "(SELECT film_id FROM film_likes WHERE user_id = ?) AND user_id <> ? " +
-                     "GROUP BY user_id ORDER BY COUNT(user_id) DESC LIMIT 1) MaxLikesCount ON ? = ? " +
-                "LEFT JOIN film_likes fl2 ON fl.film_id = fl2.film_id AND fl2.user_id = ? " +
-                "WHERE fl.user_id <> ? " +
-                "AND UserLikesCount.likes_count = MaxLikesCount.max_likes " +
-                "AND fl2.user_id IS NULL";
 
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id, id, id, id);
+        String sqlQuery = "SELECT DISTINCT fl.film_id FROM film_likes fl " +
+                "JOIN (SELECT a.user_id, COUNT(a.user_id) AS likes_count FROM film_likes AS a " +
+                "JOIN film_likes AS b  ON  a.film_id=b.film_id WHERE b.user_id = ? AND  a.user_id<>? GROUP BY a.user_id) " +
+                "UserLikesCount ON fl.user_id = UserLikesCount.user_id " +
+                "JOIN (SELECT COUNT(a.user_id) AS max_likes FROM film_likes AS a " +
+                "JOIN film_likes AS b  ON  a.film_id=b.film_id WHERE b.user_id = ? AND  a.user_id<>? " +
+                "GROUP BY a.user_id ORDER BY COUNT(a.user_id) DESC LIMIT 1) MaxLikesCount ON 1 = 1 " +
+                "LEFT JOIN film_likes fl2 ON fl.film_id = fl2.film_id AND fl2.user_id = ? " +
+                "WHERE fl.user_id <> ? AND UserLikesCount.likes_count = MaxLikesCount.max_likes AND fl2.user_id IS NULL";
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id, id);
         Set<Film> recomendatedFilms = new HashSet<>();
         while (rowSet.next()) {
             Film film = dbFilmService.getById(rowSet.getLong("film_id"));
