@@ -14,7 +14,7 @@ public class ReviewLikeDaoImpl implements ReviewLikeDao {
     public void add(Long id, Long userId) {
         String sqlQuery = "INSERT INTO review_likes (review_id, user_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, id, userId);
-        sqlQuery = "UPDATE reviews SET useful = useful + 1 WHERE review_id = ?";
+        sqlQuery = "UPDATE reviews SET useful = useful + 1 WHERE id = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 
@@ -22,7 +22,7 @@ public class ReviewLikeDaoImpl implements ReviewLikeDao {
     public void delete(Long id, Long userId) {
         String sqlQuery = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
         jdbcTemplate.update(sqlQuery, id, userId);
-        sqlQuery = "UPDATE reviews SET useful = useful - 1 WHERE review_id = ?";
+        sqlQuery = "UPDATE reviews SET useful = useful - 1 WHERE id = ?";
         jdbcTemplate.update(sqlQuery, id);
     }
 }

@@ -311,8 +311,8 @@ class UserDaoImplTest {
             listId.add(film.getId());
         }
 
-        assertTrue(listId.contains(2));
-        assertTrue(listId.contains(3));
-        assertTrue(listId.size() == 2);
+        assertTrue(listId.contains(2L));
+        assertTrue(listId.contains(3L));
+        assertEquals(2, listId.size());
     }
 }

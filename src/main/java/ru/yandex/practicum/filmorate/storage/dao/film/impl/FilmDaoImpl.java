@@ -151,10 +151,10 @@ public class FilmDaoImpl implements FilmDao {
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         Set<Genre> genres = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
 
-        String directorSql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
-                "FROM FILM_DIRECTORS fd LEFT JOIN DIRECTORS d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
-                "WHERE FD .FILM_ID =?\n" +
-                "ORDER BY d.DIRECTOR_ID ";
+        String directorSql = "SELECT d.id, d.NAME \n" +
+                "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.id \n" +
+                "WHERE fd.film_id = ?\n" +
+                "ORDER BY d.id ";
         Set<Director> directors = new HashSet<>(jdbcTemplate.query(directorSql, this::mapRowToDirector, filmId));
 
         return Film.builder()
@@ -178,7 +178,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
-        return new Director(rs.getLong("director_id"), rs.getString("name"));
+        return new Director(rs.getLong("id"), rs.getString("name"));
     }
 
     @Override
@@ -200,7 +200,7 @@ public class FilmDaoImpl implements FilmDao {
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
                 "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
-                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.id " +
                 "WHERE lower(d.name) LIKE lower(?)" +
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
         String keyWordForSql = "%" + keyWord + "%";
@@ -222,7 +222,7 @@ public class FilmDaoImpl implements FilmDao {
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
                 "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
-                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.id " +
                 "WHERE lower(f.name) LIKE lower(?) or " +
                 "lower(d.name) LIKE lower(?) " +
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";

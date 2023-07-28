@@ -27,7 +27,7 @@ public class ReviewDaoImpl implements ReviewDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"review_id"});
+            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"id"});
             ps.setString(1, review.getContent());
             ps.setBoolean(2, review.getIsPositive());
             ps.setLong(3, review.getUserId());
@@ -45,14 +45,14 @@ public class ReviewDaoImpl implements ReviewDao {
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?," +
                 "is_positive = ? " +
-                "WHERE review_id = ?";
+                "WHERE id = ?";
         jdbcTemplate.update(sqlQuery, review.getContent(), review.getIsPositive(), review.getReviewId());
         return findById(review.getReviewId());
     }
 
     @Override
     public Review findById(Long id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM reviews WHERE review_id = ?", this::mapRowToReview, id);
+        return jdbcTemplate.queryForObject("SELECT * FROM reviews WHERE id = ?", this::mapRowToReview, id);
     }
 
     @Override
@@ -61,22 +61,22 @@ public class ReviewDaoImpl implements ReviewDao {
 
         if (filmId != null) {
             sqlQuery = "SELECT * FROM reviews WHERE film_id = ? " +
-                    "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+                    "GROUP BY id ORDER BY useful DESC LIMIT ?";
             return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
         } else {
-            sqlQuery = "SELECT * FROM reviews GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+            sqlQuery = "SELECT * FROM reviews GROUP BY id ORDER BY useful DESC LIMIT ?";
             return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
         }
     }
 
     @Override
     public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", id);
+        jdbcTemplate.update("DELETE FROM reviews WHERE id = ?", id);
     }
 
     @Override
     public boolean checkExist(Long id) throws NotFoundException {
-        String sqlQuery = "SELECT review_id FROM reviews WHERE review_id = ?";
+        String sqlQuery = "SELECT id FROM reviews WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
             throw new NotFoundException(String.format("Review ID = %d does not exist", id));
@@ -86,7 +86,7 @@ public class ReviewDaoImpl implements ReviewDao {
 
     private Review mapRowToReview(ResultSet rs, int rowNum) throws SQLException {
         return Review.builder()
-                .reviewId(rs.getLong("review_id"))
+                .reviewId(rs.getLong("id"))
                 .content(rs.getString("content"))
                 .isPositive(rs.getBoolean("is_positive"))
                 .userId(rs.getLong("user_id"))

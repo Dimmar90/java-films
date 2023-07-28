@@ -30,7 +30,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"director_id"});
+            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"id"});
             ps.setString(1, director.getName());
             return ps;
         }, keyHolder);
@@ -41,7 +41,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director update(Director director) {
-        String sqlQuery = "UPDATE directors SET name = ? WHERE director_id = ?";
+        String sqlQuery = "UPDATE directors SET name = ? WHERE id = ?";
         jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
         return director;
     }
@@ -55,7 +55,7 @@ public class DirectorDaoImpl implements DirectorDao {
     @Override
     public Optional<Director> findById(Long id) {
         if(checkExist(id)) {
-            String sqlQuery = "SELECT * FROM directors WHERE director_id = ?";
+            String sqlQuery = "SELECT * FROM directors WHERE id = ?";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id));
         }
         return Optional.empty();
@@ -63,7 +63,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM directors WHERE director_id = ?", id);
+        jdbcTemplate.update("DELETE FROM directors WHERE id = ?", id);
     }
 
     @Override
@@ -80,17 +80,17 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void addDirectorsToFilm(Film film) {
-        String sql = "SELECT d.director_id, d.name " +
-                "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.director_id " +
+        String sql = "SELECT d.id, d.name " +
+                "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.id " +
                 "WHERE fd.film_id = ? " +
-                "ORDER BY d.director_id";
+                "ORDER BY d.id";
         HashSet<Director> listOfDirectors = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToDirector, film.getId()));
         film.setDirectors(listOfDirectors);
     }
 
     @Override
     public boolean checkExist(Long id) throws NotFoundException {
-        String sqlQuery = "SELECT director_id FROM directors WHERE director_id = ?";
+        String sqlQuery = "SELECT id FROM directors WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
             throw new NotFoundException(String.format("Director ID = %d does not exist", id));
@@ -100,7 +100,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
         return Director.builder()
-                .id(rs.getLong("director_id"))
+                .id(rs.getLong("id"))
                 .name(rs.getString("name"))
                 .build();
     }

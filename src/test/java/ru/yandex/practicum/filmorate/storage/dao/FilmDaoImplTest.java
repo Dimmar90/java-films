@@ -74,7 +74,7 @@ class FilmDaoImplTest {
         filmStorage.create(film);
         filmStorage.update(
                 Film.builder()
-                        .id(1)
+                        .id(1L)
                         .name("some newFilm")
                         .description("new description some film")
                         .duration(150)
@@ -85,9 +85,9 @@ class FilmDaoImplTest {
                         .build()
         );
 
-        assertEquals("some newFilm", filmStorage.findById(1).getName());
-        assertEquals("new description some film", filmStorage.findById(1).getDescription());
-        Set<ConstraintViolation<Film>> violations = validator.validate(filmStorage.findById(1));
+        assertEquals("some newFilm", filmStorage.findById(1L).getName());
+        assertEquals("new description some film", filmStorage.findById(1L).getDescription());
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmStorage.findById(1L));
         assertTrue(violations.isEmpty());
     }
 
@@ -119,7 +119,7 @@ class FilmDaoImplTest {
     @Test
     void shouldGetFilmById() {
         filmStorage.create(film);
-        assertEquals(film, filmStorage.findById(1));
+        assertEquals(film, filmStorage.findById(1L));
     }
 
     @Test
@@ -221,7 +221,7 @@ class FilmDaoImplTest {
 
         final NotFoundException e = assertThrows(
                 NotFoundException.class,
-                () -> filmStorage.checkExist(2)
+                () -> filmStorage.checkExist(2L)
         );
         assertEquals("Film ID = 2 does not exist", e.getMessage());
     }
@@ -293,7 +293,7 @@ class FilmDaoImplTest {
 
     @Test
     void shouldGetGenreById() {
-        assertEquals("Триллер", genreStorage.findById(4).getName());
+        assertEquals("Триллер", genreStorage.findById(4L).getName());
     }
 
     @Test
@@ -317,7 +317,7 @@ class FilmDaoImplTest {
 
         assertTrue(filmStorage.findById(film.getId())
                 .getGenres()
-                .contains(genreStorage.findById(6)));
+                .contains(genreStorage.findById(6L)));
     }
 
     @Test
@@ -327,8 +327,8 @@ class FilmDaoImplTest {
         genreStorage.add(film.getId(), 2);
 
         Set<Genre> genres = Set.of(
-                genreStorage.findById(6),
-                genreStorage.findById(2)
+                genreStorage.findById(6L),
+                genreStorage.findById(2L)
         );
         assertEquals(genres, genreStorage.findFilmGenres(film.getId()));
     }
@@ -354,7 +354,7 @@ class FilmDaoImplTest {
     void shouldDeleteFilmById() {
         filmStorage.create(film);
         List<Film> expectedFilms = filmStorage.findAll();
-        film.setId(1);
+        film.setId(1L);
         film.setDirectors(new HashSet<>());
         genreStorage.add(film.getId(), 2);
 
