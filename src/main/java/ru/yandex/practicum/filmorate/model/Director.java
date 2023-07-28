@@ -1,16 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Mpa {
-    private Integer id;
-    @NotNull(message = "Mpa name must be completed")
+@Builder
+public class Director {
+    private Long id;
+    @NotBlank(message = "Director name must be completed")
     private String name;
 }

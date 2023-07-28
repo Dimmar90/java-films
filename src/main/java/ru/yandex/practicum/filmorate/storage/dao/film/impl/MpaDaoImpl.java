@@ -18,7 +18,7 @@ public class MpaDaoImpl implements MpaDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Mpa getMpa(Integer id) {
+    public Mpa findById(Integer id) {
         String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
         if (rowSet.next()) {
@@ -29,7 +29,7 @@ public class MpaDaoImpl implements MpaDao {
     }
 
     @Override
-    public List<Mpa> getAllMpa() {
+    public List<Mpa> findAll() {
         String sqlQuery = "SELECT * FROM mpa";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
     }

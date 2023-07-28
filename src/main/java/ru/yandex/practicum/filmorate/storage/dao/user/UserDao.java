@@ -1,7 +1,20 @@
 package ru.yandex.practicum.filmorate.storage.dao.user;
 
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.User;
 
-public interface UserDao extends UserStorage {
-    boolean checkUserExist(Integer id);
+import java.util.List;
+
+public interface UserDao {
+
+    User create(User user);
+
+    User update(User user);
+
+    List<User> findAll();
+
+    User findById(Long id);
+
+    boolean checkExist(Long id);
+
+    void delete(Long userId);
 }

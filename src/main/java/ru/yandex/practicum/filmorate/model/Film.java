@@ -22,9 +22,10 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class Film {
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Film name must be completed")
     private String name;
+    @NotNull(message = "Film description must be completed")
     @Size(max = 200, message = "Description of the film must be no more than 200 characters")
     private String description;
     @Positive(message = "Film duration must be a positive number")
@@ -34,6 +35,7 @@ public class Film {
     @NotNull(message = "Film rating MPA must be completed")
     private Mpa mpa;
     private Set<Genre> genres;
+    private Set<Director> directors;
     @Setter(AccessLevel.NONE)
-    private Set<Integer> likes = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>(); // для реализации InMemory storage
 }
