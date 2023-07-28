@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.DBFilmService;
-import ru.yandex.practicum.filmorate.service.DBUserService;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -18,8 +18,8 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
-    private final DBUserService userService;
-    private final DBFilmService dbFilmService;
+    private final UserService userService;
+    private final FilmService dbFilmService;
 
 
     @PostMapping
@@ -39,17 +39,17 @@ public class UserController {
 
     @GetMapping
     public List<User> getUsers() {
-        return userService.getUsers();
+        return userService.getAll();
     }
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable("id") Integer userId) {
-        return userService.getUser(userId);
+        return userService.getById(userId);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> getUserFriends(@PathVariable("id") Integer userId) {
-        return userService.getUserFriends(userId);
+        return userService.getFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -59,12 +59,12 @@ public class UserController {
 
     @GetMapping("/{id}/recommendations")  //id usera которому рекомендуются фильмы
     public Set<Film> getRecommendationsFilms(@PathVariable("id") Integer id) {
-        return userService.getRecommendationsFilms(id, dbFilmService);
+        return userService.getRecommendedFilms(id, dbFilmService);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable("userId") Integer userId) {
-        userService.deleteUserById(userId);
+        userService.delete(userId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
@@ -74,6 +74,6 @@ public class UserController {
 
     @GetMapping("/{id}/feed")
     public List<Event> getEventFeed(@PathVariable("id") Integer userId) {
-        return userService.getEventFeed(userId);
+        return userService.getUserFeed(userId);
     }
 }

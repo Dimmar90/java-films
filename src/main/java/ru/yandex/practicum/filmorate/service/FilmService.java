@@ -20,17 +20,17 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class DBFilmService {
+public class FilmService {
     private final FilmDao filmDao;
-    private final DBUserService userService;
+    private final UserService userService;
     private final GenreDao genreDao;
     private final FilmLikesDao filmLikesDao;
     private final DirectorDao directorDao;
     private final EventDao eventDao;
 
     @Autowired
-    public DBFilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, DBUserService userService,
-                         GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao, EventDao eventDao) {
+    public FilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, UserService userService,
+                       GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao, EventDao eventDao) {
         this.filmDao = filmDao;
         this.userService = userService;
         this.genreDao = genreDao;
@@ -83,7 +83,7 @@ public class DBFilmService {
 
     public void addLike(Integer filmId, Integer userId) {
         filmDao.checkExist(filmId);
-        userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
+        userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.like(filmId, userId);
         log.info("Film with ID = {} was LIKED by user with ID = {}", filmId, userId);
         eventDao.add(userId, "LIKE", "ADD", filmId); // добавляю событие в ленту
@@ -91,13 +91,13 @@ public class DBFilmService {
 
     public void deleteLike(Integer filmId, Integer userId) {
         filmDao.checkExist(filmId);
-        userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
+        userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
         filmLikesDao.unlike(filmId, userId);
         log.info("Film with ID = {} was UNLIKED by user with ID = {}", filmId, userId);
         eventDao.add(userId, "LIKE", "REMOVE", filmId); // удаляю событие из ленты
     }
 
-    public Film getFilm(Integer id) {
+    public Film getById(Integer id) {
         filmDao.checkExist(id);
         Film film = filmDao.findById(id);
         film.setGenres(genreDao.findFilmGenres(film.getId()));
@@ -106,7 +106,7 @@ public class DBFilmService {
         return film;
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getAll() {
         List<Film> films = new ArrayList<>();
         for (Film film : filmDao.findAll()) {
             film.setGenres(genreDao.findFilmGenres(film.getId()));
@@ -119,14 +119,14 @@ public class DBFilmService {
     public List<Film> getDirectorsFilms(Integer directorsId, String sortBy) {
         List<Film> sortedDirectorsFilms = new ArrayList<>();
         if (sortBy.equals("likes")) {
-            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByRate(directorsId));
+            sortedDirectorsFilms = getSortedBy(directorsId, filmDao.findDirectorsFilmsSortedByRate(directorsId));
         } else if (sortBy.equals("year")) {
-            sortedDirectorsFilms = getSortedListOfFilms(directorsId, filmDao.findDirectorsFilmsSortedByYears(directorsId));
+            sortedDirectorsFilms = getSortedBy(directorsId, filmDao.findDirectorsFilmsSortedByYears(directorsId));
         }
         return sortedDirectorsFilms;
     }
 
-    public List<Film> getSortedListOfFilms(Integer directorsId, List<Film> sortedListOfFilms) {
+    public List<Film> getSortedBy(Integer directorsId, List<Film> sortedListOfFilms) {
         directorDao.checkExist(directorsId);
         List<Film> directorFilms = new ArrayList<>();
         for (Film film : sortedListOfFilms) {
@@ -136,7 +136,7 @@ public class DBFilmService {
         return directorFilms;
     }
 
-    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
+    public List<Film> getTop(Integer count, Integer genreId, Integer year) {
         log.info("Get {} popular films", count);
         return filmDao.findTop(count, genreId, year);
     }
@@ -155,15 +155,15 @@ public class DBFilmService {
         }
     }
 
-    public void deleteFilmById(Integer filmId) {
+    public void delete(Integer filmId) {
         filmDao.checkExist(filmId);
         filmDao.delete(filmId);
         log.info("Delete film from films with ID = {}", filmId);
     }
 
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        userService.getUser(userId); // метод getUser() выбросит исключение, если userId не существует
-        userService.getUser(friendId); // метод getUser() выбросит исключение, если friendId не существует
+    public List<Film> getCommon(Integer userId, Integer friendId) {
+        userService.getById(userId); // метод getUser() выбросит исключение, если userId не существует
+        userService.getById(friendId); // метод getUser() выбросит исключение, если friendId не существует
         log.info("Get common films of users with ID = {} and ID = {}", userId, friendId);
         return filmDao.findCommon(userId, friendId);
     }

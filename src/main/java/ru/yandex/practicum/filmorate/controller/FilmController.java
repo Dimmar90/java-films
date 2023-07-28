@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.DBFilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmController {
-    private final DBFilmService filmService;
+    private final FilmService filmService;
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
@@ -39,12 +39,12 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
-        return filmService.getFilms();
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable("id") Integer filmId) {
-        return filmService.getFilm(filmId);
+        return filmService.getById(filmId);
     }
 
     @GetMapping("/popular")
@@ -52,12 +52,12 @@ public class FilmController {
             @Positive @RequestParam(value = "count", defaultValue = "10") Integer count,
             @RequestParam(value = "genreId", required = false) Integer genreId,
             @RequestParam(value = "year", required = false) Integer year) {
-        return filmService.getTopFilms(count, genreId, year);
+        return filmService.getTop(count, genreId, year);
     }
 
     @GetMapping("/common") //?userId={userId}&friendId={friendId}
     public List<Film> getCommonFilms(@RequestParam("userId") Integer userId, @RequestParam("friendId") Integer id) {
-        return filmService.getCommonFilms(userId, id);
+        return filmService.getCommon(userId, id);
     }
 
     @GetMapping("/director/{directorId}")
@@ -67,7 +67,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable("filmId") Integer filmId) {
-        filmService.deleteFilmById(filmId);
+        filmService.delete(filmId);
     }
 
     @GetMapping("/search")

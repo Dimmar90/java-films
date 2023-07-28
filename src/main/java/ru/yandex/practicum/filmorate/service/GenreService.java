@@ -12,15 +12,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DBGenreService {
+public class GenreService {
     private final GenreDao genreDao;
 
-    public Genre getGenre(Integer id) throws NotFoundException {
+    public Genre getById(Integer id) throws NotFoundException {
         log.info("Get a genre with ID = {}", id);
         return genreDao.findById(id);
     }
 
-    public List<Genre> getAllGenres() {
+    public List<Genre> getAll() {
         log.info("Get all genres");
         return genreDao.findAll();
     }

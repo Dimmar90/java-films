@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.DBFilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
 import java.sql.PreparedStatement;
@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
     }
 
-    public Set<Film> findRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+    public Set<Film> findRecommendationsFilms(Integer id, FilmService dbFilmService) {
         String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
                 "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
                 "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
@@ -86,14 +86,14 @@ public class UserDaoImpl implements UserDao {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
         Set<Film> recomendatedFilms = new HashSet<>();
         while (rowSet.next()) {
-            Film film = dbFilmService.getFilm(rowSet.getInt("FILM_ID"));
+            Film film = dbFilmService.getById(rowSet.getInt("FILM_ID"));
             recomendatedFilms.add(film);
         }
         return recomendatedFilms;
     }
 
     @Override
-    public boolean checkExist(Integer id) {
+    public boolean checkExist(Integer id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

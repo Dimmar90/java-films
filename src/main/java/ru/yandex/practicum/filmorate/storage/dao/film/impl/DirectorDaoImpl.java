@@ -89,7 +89,7 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public boolean checkExist(Integer id) {
+    public boolean checkExist(Integer id) throws NotFoundException {
         String sqlQuery = "SELECT director_id FROM directors WHERE director_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
