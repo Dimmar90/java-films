@@ -18,19 +18,19 @@ public class FriendDaoImpl implements FriendDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void addFriend(Integer id, Integer friendId) {
+    public void add(Integer id, Integer friendId) {
         String sqlQuery = "MERGE INTO friendship (user_id, friend_user_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, id, friendId);
     }
 
     @Override
-    public void deleteFriend(Integer id, Integer friendId) {
+    public void delete(Integer id, Integer friendId) {
         String sqlQuery = "DELETE FROM friendship WHERE user_id = ? AND friend_user_id = ?";
         jdbcTemplate.update(sqlQuery, id, friendId);
     }
 
     @Override
-    public List<User> getCommonFriends(Integer id, Integer otherId) { //Проверить
+    public List<User> findCommon(Integer id, Integer otherId) { //Проверить
         String sqlQuery = "SELECT * FROM users u " +
                 "WHERE u.id IN (SELECT friend_user_id FROM friendship fs WHERE fs.user_id = ?) " +
                 "AND u.id IN (SELECT friend_user_id FROM friendship fs WHERE fs.user_id = ?)";
@@ -39,7 +39,7 @@ public class FriendDaoImpl implements FriendDao {
     }
 
     @Override
-    public List<User> getAllFriends(Integer id) {
+    public List<User> findAll(Integer id) {
         String sqlQuery = "SELECT * FROM users WHERE id IN " +
                 "(SELECT friend_user_id FROM friendship WHERE user_id = ?)";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sqlQuery, id);

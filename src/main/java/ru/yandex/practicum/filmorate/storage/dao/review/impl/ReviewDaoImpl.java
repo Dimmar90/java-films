@@ -47,16 +47,16 @@ public class ReviewDaoImpl implements ReviewDao {
                 "isPositive = ? " +
                 "WHERE review_id = ?";
         jdbcTemplate.update(sqlQuery, review.getContent(), review.getIsPositive(), review.getReviewId());
-        return getById(review.getReviewId());
+        return findById(review.getReviewId());
     }
 
     @Override
-    public Review getById(Integer id) {
+    public Review findById(Integer id) {
         return jdbcTemplate.queryForObject("SELECT * FROM reviews WHERE review_id = ?", this::mapRowToReview, id);
     }
 
     @Override
-    public List<Review> getAllReviews(Integer filmId, Integer count) {
+    public List<Review> findAll(Integer filmId, Integer count) {
         String sqlQuery = "SELECT * FROM reviews %s" +
                 "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
 
@@ -68,12 +68,12 @@ public class ReviewDaoImpl implements ReviewDao {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void delete(Integer id) {
         jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", id);
     }
 
     @Override
-    public boolean checkReviewExist(Integer id) {
+    public boolean checkExist(Integer id) {
         String sqlQuery = "SELECT review_id FROM reviews WHERE review_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

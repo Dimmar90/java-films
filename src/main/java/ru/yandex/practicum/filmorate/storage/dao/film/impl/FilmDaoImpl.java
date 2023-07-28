@@ -24,7 +24,7 @@ public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         String sqlQuery = "INSERT INTO films (name, description, duration, releaseDate, mpa_id) VALUES (?,?,?,?,?)";
         Integer mpaId = film.getMpa().getId();
         KeyHolder id = new GeneratedKeyHolder();
@@ -47,7 +47,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         Integer mpaId = film.getMpa().getId();
         String sqlQuery = "UPDATE films SET " +
                 "name = ?," +
@@ -66,29 +66,29 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> getFilms() {
+    public List<Film> findAll() {
         String sqlQuery = "SELECT * FROM films";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     @Override
-    public Film getById(Integer id) {
+    public Film findById(Integer id) {
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
-    public void deleteFilmById(Integer filmId) {
+    public void delete(Integer filmId) {
         jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count) {
+    public List<Film> findTop(Integer count) {
         return jdbcTemplate.query(String.format(getSqlForTopFilms(), ""), this::mapRowToFilm, count);
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
-        if (genreId == null & year == null) return getTopFilms(count);
+    public List<Film> findTop(Integer count, Integer genreId, Integer year) {
+        if (genreId == null & year == null) return findTop(count);
 
         List<String> params = new ArrayList<>();
         if (genreId != null) params.add(String.format("genre_id = %s", genreId));
@@ -99,7 +99,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+    public List<Film> findCommon(Integer userId, Integer friendId) {
         String sqlQuery = "SELECT f.* FROM films f " +
                 "JOIN film_likes fl1 ON fl1.film_id = f.id " +
                 "JOIN film_likes fl2 ON fl2.film_id = f.id " +
@@ -131,7 +131,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public boolean checkFilmExist(Integer id) {
+    public boolean checkExist(Integer id) {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -183,12 +183,12 @@ public class FilmDaoImpl implements FilmDao {
     public List<Film> search(String keyWord, String whereSearch) {
         String[] s = whereSearch.split(",");
         if (s.length == 2) {
-            return searchByDirAndTitle(keyWord);
+            return searchByDirectorAndName(keyWord);
         } else {
             if (s[0].equals("director")) {
                 return searchByDirector(keyWord);
             } else {
-                return searchByTitle(keyWord);
+                return searchByName(keyWord);
             }
         }
     }
@@ -205,7 +205,7 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
     }
 
-    private List<Film> searchByTitle(String keyWord) {
+    private List<Film> searchByName(String keyWord) {
         String newSql = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
@@ -215,7 +215,7 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
     }
 
-    private List<Film> searchByDirAndTitle(String keyWord) {
+    private List<Film> searchByDirectorAndName(String keyWord) {
         String newSql = "SELECT f.*, m.name AS mpa_name, d.name FROM films AS f " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +

@@ -17,11 +17,11 @@ public class DBMpaService {
 
     public Mpa getMpa(Integer id) throws NotFoundException {
         log.info("Get a MPA with ID = {}", id);
-        return mpaDao.getMpa(id);
+        return mpaDao.findById(id);
     }
 
     public List<Mpa> getAllMpa() {
         log.info("Get all MPA");
-        return mpaDao.getAllMpa();
+        return mpaDao.findAll();
     }
 }

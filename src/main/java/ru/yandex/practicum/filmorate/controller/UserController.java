@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") Integer userId) {
+    public User getUser(@PathVariable("id") Integer userId) {
         return userService.getUser(userId);
     }
 
@@ -63,7 +63,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUserById(@PathVariable("userId") Integer userId) {
+    public void deleteUser(@PathVariable("userId") Integer userId) {
         userService.deleteUserById(userId);
     }
 

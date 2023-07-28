@@ -7,13 +7,13 @@ import java.util.Set;
 
 public interface GenreDao {
 
-    void addGenreInFilm(Integer filmId, Integer genreId);
+    void add(Integer filmId, Integer genreId);
 
-    Set<Genre> getFilmGenres(Integer filmId);
+    Set<Genre> findFilmGenres(Integer filmId);
 
-    Genre getGenre(Integer id);
+    Genre findById(Integer id);
 
-    List<Genre> getAllGenres();
+    List<Genre> findAll();
 
-    void deleteFilmGenre(Integer filmId);
+    void deleteFilmGenres(Integer filmId);
 }

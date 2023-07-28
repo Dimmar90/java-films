@@ -23,15 +23,15 @@ public class InMemoryUserService {
     public User create(User user) {
         if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         log.info("User {} has been CREATED", user);
-        return userStorage.createUser(user);
+        return userStorage.create(user);
     }
 
     public User update(User user) {
-        if (user.getId() == null || userStorage.getById(user.getId()) == null) {
+        if (user.getId() == null || userStorage.findById(user.getId()) == null) {
             throw new NotFoundException("Cannot update user with ID = null");
         }
         log.info("User {} has been UPDATED", user);
-        return userStorage.updateUser(user);
+        return userStorage.update(user);
     }
 
     public void addFriend(Integer userId, Integer friendId) {
@@ -62,19 +62,19 @@ public class InMemoryUserService {
     }
 
     public User getUser(Integer id) {
-        if (userStorage.getById(id) == null) {
+        if (userStorage.findById(id) == null) {
             throw new NotFoundException(String.format("User ID = %d does not exist", id));
         }
         log.info("Get a user with ID = {}", id);
-        return userStorage.getById(id);
+        return userStorage.findById(id);
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userStorage.findAll();
     }
 
     public List<User> getUserFriends(Integer id) {
-        if (userStorage.getById(id) == null) {
+        if (userStorage.findById(id) == null) {
             throw new NotFoundException(String.format("User ID = %d does not exist", id));
         }
         log.info("Get friends of the user with ID= {}", id);

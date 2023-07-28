@@ -13,31 +13,31 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Integer filmId = 1;
 
     @Override
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         film.setId(filmId++);
         films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public List<Film> getFilms() {
+    public List<Film> findAll() {
         return new ArrayList<>(films.values());
     }
 
     @Override
-    public Film getById(Integer id) {
+    public Film findById(Integer id) {
         return films.get(id);
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count) {
-        return getFilms().stream()
+    public List<Film> findTop(Integer count) {
+        return findAll().stream()
                 .sorted(Collections.reverseOrder(Comparator.comparingInt(film -> film.getLikes().size())))
                 .limit(count)
                 .collect(Collectors.toList());

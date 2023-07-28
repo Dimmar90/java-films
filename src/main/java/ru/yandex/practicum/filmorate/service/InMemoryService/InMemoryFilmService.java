@@ -26,15 +26,15 @@ public class InMemoryFilmService {
 
     public Film create(Film film) {
         log.info("Film {} has been CREATED", film);
-        return filmStorage.createFilm(film);
+        return filmStorage.create(film);
     }
 
     public Film update(Film film) {
-        if (film.getId() == null || filmStorage.getById(film.getId()) == null) {
+        if (film.getId() == null || filmStorage.findById(film.getId()) == null) {
             throw new NotFoundException("Can't update film with ID = null");
         }
         log.info("Film {} has been UPDATED", film);
-        return filmStorage.updateFilm(film);
+        return filmStorage.update(film);
     }
 
     public void addLike(Integer filmId, Integer userId) {
@@ -62,19 +62,19 @@ public class InMemoryFilmService {
     }
 
     public Film getFilm(Integer id) {
-        if (filmStorage.getById(id) == null) {
+        if (filmStorage.findById(id) == null) {
             throw new NotFoundException(String.format("Film ID = %d does not exist", id));
         }
         log.info("Get a film with ID = {}", id);
-        return filmStorage.getById(id);
+        return filmStorage.findById(id);
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmStorage.findAll();
     }
 
     public List<Film> getTopFilms(Integer count) {
         log.info("Get {} popular films", count);
-        return filmStorage.getTopFilms(count);
+        return filmStorage.findTop(count);
     }
 }

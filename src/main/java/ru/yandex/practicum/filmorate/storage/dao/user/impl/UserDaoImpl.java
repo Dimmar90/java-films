@@ -28,7 +28,7 @@ public class UserDaoImpl implements UserDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         String sqlQuery = "INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -45,7 +45,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         String sqlQuery = "UPDATE users SET " +
                 "email = ?," +
                 "login = ?," +
@@ -58,23 +58,23 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<User> findAll() {
         String sqlQuery = "SELECT * FROM users";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     @Override
-    public User getById(Integer id) {
+    public User findById(Integer id) {
         String sqlQuery = "SELECT * FROM users WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
     }
 
     @Override
-    public void deleteUserById(Integer userId) {
+    public void delete(Integer userId) {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
     }
 
-    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+    public Set<Film> findRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
         String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
                 "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
                 "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
@@ -93,7 +93,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean checkUserExist(Integer id) {
+    public boolean checkExist(Integer id) {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

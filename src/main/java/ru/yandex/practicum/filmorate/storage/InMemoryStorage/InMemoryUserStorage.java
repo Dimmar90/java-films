@@ -15,25 +15,25 @@ public class InMemoryUserStorage implements UserStorage {
     private Integer userId = 1;
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         user.setId(userId++);
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public User getById(Integer id) {
+    public User findById(Integer id) {
         return users.get(id);
     }
 }

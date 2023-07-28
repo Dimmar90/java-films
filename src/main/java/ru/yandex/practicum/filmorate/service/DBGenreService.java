@@ -17,11 +17,11 @@ public class DBGenreService {
 
     public Genre getGenre(Integer id) throws NotFoundException {
         log.info("Get a genre with ID = {}", id);
-        return genreDao.getGenre(id);
+        return genreDao.findById(id);
     }
 
     public List<Genre> getAllGenres() {
         log.info("Get all genres");
-        return genreDao.getAllGenres();
+        return genreDao.findAll();
     }
 }

@@ -64,15 +64,15 @@ class FilmDaoImplTest {
 
     @Test
     void shouldCreateFilm() {
-        Film newFilm = filmStorage.createFilm(film);
+        Film newFilm = filmStorage.create(film);
         Set<ConstraintViolation<Film>> violations = validator.validate(newFilm);
         assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldUpdateFilm() {
-        filmStorage.createFilm(film);
-        filmStorage.updateFilm(
+        filmStorage.create(film);
+        filmStorage.update(
                 Film.builder()
                         .id(1)
                         .name("some newFilm")
@@ -85,16 +85,16 @@ class FilmDaoImplTest {
                         .build()
         );
 
-        assertEquals("some newFilm", filmStorage.getById(1).getName());
-        assertEquals("new description some film", filmStorage.getById(1).getDescription());
-        Set<ConstraintViolation<Film>> violations = validator.validate(filmStorage.getById(1));
+        assertEquals("some newFilm", filmStorage.findById(1).getName());
+        assertEquals("new description some film", filmStorage.findById(1).getDescription());
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmStorage.findById(1));
         assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldGetListFilmsWithoutViolations() {
-        filmStorage.createFilm(film);
-        filmStorage.createFilm(
+        filmStorage.create(film);
+        filmStorage.create(
                 Film.builder()
                         .name("some newFilm")
                         .description("new description some film")
@@ -106,7 +106,7 @@ class FilmDaoImplTest {
                         .build()
         );
 
-        Optional<Set<ConstraintViolation<Film>>> violationSet = filmStorage.getFilms().stream()
+        Optional<Set<ConstraintViolation<Film>>> violationSet = filmStorage.findAll().stream()
                 .map(film -> validator.validate(film))
                 .filter(violation -> !violation.isEmpty())
                 .findFirst();
@@ -118,14 +118,13 @@ class FilmDaoImplTest {
 
     @Test
     void shouldGetFilmById() {
-        filmStorage.createFilm(film);
-        film.setDirectors(new HashSet<>());
-        assertEquals(film, filmStorage.getById(1));
+        filmStorage.create(film);
+        assertEquals(film, filmStorage.findById(1));
     }
 
     @Test
     void shouldGetTopFilms() {
-        User user = userStorage.createUser(
+        User user = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -133,8 +132,8 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build());
 
-        Film film1 = filmStorage.createFilm(film);
-        Film film2 = filmStorage.createFilm(
+        Film film1 = filmStorage.create(film);
+        Film film2 = filmStorage.create(
                 Film.builder()
                         .name("some newFilm")
                         .description("new description some film")
@@ -147,12 +146,12 @@ class FilmDaoImplTest {
 
         likesStorage.like(film2.getId(), user.getId());
         List<Film> topFilms = List.of(film2, film1);
-        assertEquals(topFilms, filmStorage.getTopFilms(2));
+        assertEquals(topFilms, filmStorage.findTop(2));
     }
 
     @Test
     void shouldGetCommonFilms() {
-        User user1 = userStorage.createUser(
+        User user1 = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -160,7 +159,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build());
 
-        User user2 = userStorage.createUser(
+        User user2 = userStorage.create(
                 User.builder()
                         .email("user2@gmail.com")
                         .login("john")
@@ -168,7 +167,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1989, 7, 4))
                         .build());
 
-        User user3 = userStorage.createUser(
+        User user3 = userStorage.create(
                 User.builder()
                         .email("user3@gmail.com")
                         .login("ivan")
@@ -176,8 +175,8 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1988, 8, 17))
                         .build());
 
-        Film film1 = filmStorage.createFilm(film);
-        Film film2 = filmStorage.createFilm(
+        Film film1 = filmStorage.create(film);
+        Film film2 = filmStorage.create(
                 Film.builder()
                         .name("Avatar")
                         .description("description about Avatar")
@@ -189,7 +188,7 @@ class FilmDaoImplTest {
                         .build()
         );
 
-        Film film3 = filmStorage.createFilm(
+        Film film3 = filmStorage.create(
                 Film.builder()
                         .name("Kill Bill")
                         .description("description about Kill Bill")
@@ -212,24 +211,24 @@ class FilmDaoImplTest {
         likesStorage.like(film3.getId(), user3.getId());
 
         List<Film> topFilms = List.of(film3, film2); // Ожидаемый порядок списка общих фильмов
-        assertEquals(topFilms, filmStorage.getCommonFilms(user1.getId(), user2.getId()));
-        assertEquals(topFilms, filmStorage.getCommonFilms(user2.getId(), user1.getId()));
+        assertEquals(topFilms, filmStorage.findCommon(user1.getId(), user2.getId()));
+        assertEquals(topFilms, filmStorage.findCommon(user2.getId(), user1.getId()));
     }
 
     @Test
     void shouldThrowsInvalidCheckFilmExist() {
-        filmStorage.createFilm(film);
+        filmStorage.create(film);
 
         final NotFoundException e = assertThrows(
                 NotFoundException.class,
-                () -> filmStorage.checkFilmExist(2)
+                () -> filmStorage.checkExist(2)
         );
         assertEquals("Film ID = 2 does not exist", e.getMessage());
     }
 
     @Test
     void shouldGetMpaById() {
-        assertEquals("R", mpaStorage.getMpa(4).getName());
+        assertEquals("R", mpaStorage.findById(4).getName());
     }
 
     @Test
@@ -242,13 +241,13 @@ class FilmDaoImplTest {
                 new Mpa(5, "NC-17")
         );
 
-        assertEquals(listMpa, mpaStorage.getAllMpa());
+        assertEquals(listMpa, mpaStorage.findAll());
     }
 
     @Test
     void shouldNotThrowsIfLikedTwice() {
-        Film film1 = filmStorage.createFilm(film);
-        User user = userStorage.createUser(
+        Film film1 = filmStorage.create(film);
+        User user = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -262,8 +261,8 @@ class FilmDaoImplTest {
 
     @Test
     void shouldThrowsIfUnlikedTwice() {
-        Film film1 = filmStorage.createFilm(film);
-        User user = userStorage.createUser(
+        Film film1 = filmStorage.create(film);
+        User user = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -271,7 +270,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build());
 
-        Film film2 = filmStorage.createFilm(
+        Film film2 = filmStorage.create(
                 Film.builder()
                         .name("some newFilm")
                         .description("new description some film")
@@ -287,14 +286,14 @@ class FilmDaoImplTest {
         film2.setDirectors(new HashSet<>());
         List<Film> topFilms = List.of(film2, film1);
         likesStorage.like(film2.getId(), user.getId());
-        assertEquals(topFilms, filmStorage.getTopFilms(2, null, null));
+        assertEquals(topFilms, filmStorage.findTop(2, null, null));
         likesStorage.unlike(film2.getId(), user.getId());
-        assertNotEquals(topFilms, filmStorage.getTopFilms(2, null, null));
+        assertNotEquals(topFilms, filmStorage.findTop(2, null, null));
     }
 
     @Test
     void shouldGetGenreById() {
-        assertEquals("Триллер", genreStorage.getGenre(4).getName());
+        assertEquals("Триллер", genreStorage.findById(4).getName());
     }
 
     @Test
@@ -308,79 +307,79 @@ class FilmDaoImplTest {
                 new Genre(6, "Боевик")
         );
 
-        assertEquals(listGenres, genreStorage.getAllGenres());
+        assertEquals(listGenres, genreStorage.findAll());
     }
 
     @Test
     void shouldAddGenreInFilm() {
-        filmStorage.createFilm(film);
-        genreStorage.addGenreInFilm(film.getId(), 6);
+        filmStorage.create(film);
+        genreStorage.add(film.getId(), 6);
 
-        assertTrue(filmStorage.getById(film.getId())
+        assertTrue(filmStorage.findById(film.getId())
                 .getGenres()
-                .contains(genreStorage.getGenre(6)));
+                .contains(genreStorage.findById(6)));
     }
 
     @Test
     void shouldGetFilmGenres() {
-        filmStorage.createFilm(film);
-        genreStorage.addGenreInFilm(film.getId(), 6);
-        genreStorage.addGenreInFilm(film.getId(), 2);
+        filmStorage.create(film);
+        genreStorage.add(film.getId(), 6);
+        genreStorage.add(film.getId(), 2);
 
         Set<Genre> genres = Set.of(
-                genreStorage.getGenre(6),
-                genreStorage.getGenre(2)
+                genreStorage.findById(6),
+                genreStorage.findById(2)
         );
-        assertEquals(genres, genreStorage.getFilmGenres(film.getId()));
+        assertEquals(genres, genreStorage.findFilmGenres(film.getId()));
     }
 
     @Test
     void shouldDeleteGenresFromFilm() {
-        filmStorage.createFilm(film);
-        genreStorage.addGenreInFilm(film.getId(), 2);
-        genreStorage.addGenreInFilm(film.getId(), 6);
+        filmStorage.create(film);
+        genreStorage.add(film.getId(), 2);
+        genreStorage.add(film.getId(), 6);
 
-        assertFalse(filmStorage.getById(film.getId())
+        assertFalse(filmStorage.findById(film.getId())
                 .getGenres()
                 .isEmpty());
 
-        genreStorage.deleteFilmGenre(film.getId());
+        genreStorage.deleteFilmGenres(film.getId());
 
-        assertTrue(filmStorage.getById(film.getId())
+        assertTrue(filmStorage.findById(film.getId())
                 .getGenres()
                 .isEmpty());
     }
 
     @Test
     void shouldDeleteFilmById() {
-        filmStorage.createFilm(film);
-        List<Film> expectedFilms = filmStorage.getFilms();
+        filmStorage.create(film);
+        List<Film> expectedFilms = filmStorage.findAll();
         film.setId(1);
         film.setDirectors(new HashSet<>());
-        genreStorage.addGenreInFilm(film.getId(), 2);
+        genreStorage.add(film.getId(), 2);
 
         assertThat(expectedFilms).hasSize(1).contains(film);
-        filmStorage.deleteFilmById(film.getId());
-        assertThat(filmStorage.getFilms()).hasSize(0);
-        assertThat(genreStorage.getFilmGenres(film.getId())).hasSize(0);
+        filmStorage.delete(film.getId());
+        assertThat(filmStorage.findAll()).hasSize(0);
+        assertThat(genreStorage.findFilmGenres(film.getId())).hasSize(0);
     }
 
     @Test
     void shouldGetEmptyListReviews() {
-        assertTrue(reviewStorage.getAllReviews(null, 10).isEmpty());
+        assertTrue(reviewStorage.findAll(null, 10).isEmpty());
     }
 
     @Test
     void shouldGetEmptyListReviewsForFilm() {
-        filmStorage.createFilm(film);
-        assertTrue(reviewStorage.getAllReviews(film.getId(), 10).isEmpty());
+        filmStorage.create(film);
+        assertTrue(reviewStorage.findAll(film.getId(), 10).isEmpty());
     }
 
     @Test
     void shouldGetListReviewsForFilm() {
-        filmStorage.createFilm(film);
+        filmStorage.create(film);
 
-        User user = userStorage.createUser(
+        User user = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -397,14 +396,14 @@ class FilmDaoImplTest {
                         .build());
 
         List<Review> expected = List.of(review);
-        assertEquals(expected, reviewStorage.getAllReviews(film.getId(), 10));
+        assertEquals(expected, reviewStorage.findAll(film.getId(), 10));
     }
 
     @Test
     void shouldGetListReviewsForFilmRangedByUseful() {
-        filmStorage.createFilm(film);
+        filmStorage.create(film);
 
-        User user1 = userStorage.createUser(
+        User user1 = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -412,7 +411,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build());
 
-        User user2 = userStorage.createUser(
+        User user2 = userStorage.create(
                 User.builder()
                         .email("user2@gmail.com")
                         .login("john")
@@ -420,7 +419,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1989, 7, 4))
                         .build());
 
-        User user3 = userStorage.createUser(
+        User user3 = userStorage.create(
                 User.builder()
                         .email("user3@gmail.com")
                         .login("ivan")
@@ -452,22 +451,22 @@ class FilmDaoImplTest {
                         .filmId(film.getId())
                         .build());
 
-        reviewDislikeStorage.setDislike(review1.getReviewId(), user2.getId());
-        reviewDislikeStorage.setDislike(review1.getReviewId(), user3.getId());
-        reviewLikeStorage.setLike(review2.getReviewId(), user3.getId());
+        reviewDislikeStorage.add(review1.getReviewId(), user2.getId());
+        reviewDislikeStorage.add(review1.getReviewId(), user3.getId());
+        reviewLikeStorage.add(review2.getReviewId(), user3.getId());
 
         List<Review> expected = List.of(
-                reviewStorage.getById(review2.getReviewId()),
-                reviewStorage.getById(review3.getReviewId()),
-                reviewStorage.getById(review1.getReviewId())
+                reviewStorage.findById(review2.getReviewId()),
+                reviewStorage.findById(review3.getReviewId()),
+                reviewStorage.findById(review1.getReviewId())
         );
-        assertEquals(expected, reviewStorage.getAllReviews(film.getId(), 10));
+        assertEquals(expected, reviewStorage.findAll(film.getId(), 10));
     }
 
     @Test
     void shouldGetListReviewsForFilmsRangedByUseful() {
-        Film film1 = filmStorage.createFilm(film);
-        Film film2 = filmStorage.createFilm(
+        Film film1 = filmStorage.create(film);
+        Film film2 = filmStorage.create(
                 Film.builder()
                         .name("Avatar")
                         .description("description about Avatar")
@@ -477,7 +476,7 @@ class FilmDaoImplTest {
                         .genres(new HashSet<>())
                         .build());
 
-        User user1 = userStorage.createUser(
+        User user1 = userStorage.create(
                 User.builder()
                         .email("user1@gmail.com")
                         .login("alex")
@@ -485,7 +484,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1980, 5, 25))
                         .build());
 
-        User user2 = userStorage.createUser(
+        User user2 = userStorage.create(
                 User.builder()
                         .email("user2@gmail.com")
                         .login("john")
@@ -493,7 +492,7 @@ class FilmDaoImplTest {
                         .birthday(LocalDate.of(1989, 7, 4))
                         .build());
 
-        User user3 = userStorage.createUser(
+        User user3 = userStorage.create(
                 User.builder()
                         .email("user3@gmail.com")
                         .login("ivan")
@@ -533,19 +532,19 @@ class FilmDaoImplTest {
                         .filmId(film2.getId())
                         .build());
 
-        reviewDislikeStorage.setDislike(review1.getReviewId(), user2.getId());
-        reviewDislikeStorage.setDislike(review1.getReviewId(), user3.getId());
-        reviewLikeStorage.setLike(review2.getReviewId(), user3.getId());
-        reviewLikeStorage.setLike(review3.getReviewId(), user2.getId());
-        reviewLikeStorage.setLike(review4.getReviewId(), user1.getId());
-        reviewLikeStorage.setLike(review4.getReviewId(), user3.getId());
+        reviewDislikeStorage.add(review1.getReviewId(), user2.getId());
+        reviewDislikeStorage.add(review1.getReviewId(), user3.getId());
+        reviewLikeStorage.add(review2.getReviewId(), user3.getId());
+        reviewLikeStorage.add(review3.getReviewId(), user2.getId());
+        reviewLikeStorage.add(review4.getReviewId(), user1.getId());
+        reviewLikeStorage.add(review4.getReviewId(), user3.getId());
 
         List<Review> expected = List.of(
-                reviewStorage.getById(review4.getReviewId()),
-                reviewStorage.getById(review2.getReviewId()),
-                reviewStorage.getById(review3.getReviewId()),
-                reviewStorage.getById(review1.getReviewId())
+                reviewStorage.findById(review4.getReviewId()),
+                reviewStorage.findById(review2.getReviewId()),
+                reviewStorage.findById(review3.getReviewId()),
+                reviewStorage.findById(review1.getReviewId())
         );
-        assertEquals(expected, reviewStorage.getAllReviews(null, 10));
+        assertEquals(expected, reviewStorage.findAll(null, 10));
     }
 }

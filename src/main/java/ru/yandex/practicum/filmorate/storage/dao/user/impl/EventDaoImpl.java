@@ -19,14 +19,14 @@ public class EventDaoImpl implements EventDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void addEvent(Integer userId, String eventType, String operation, Integer entityId) {  // добавляю событие в БД
+    public void add(Integer userId, String eventType, String operation, Integer entityId) {  // добавляю событие в БД
         Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
         String sqlQuery = "INSERT INTO events (timestamp, userId, eventType, operation, entityId) VALUES (?,?,?,?,?)";
         jdbcTemplate.update(sqlQuery, timestamp, userId, eventType, operation, entityId);
     }
 
     @Override
-    public List<Event> getEventFeed(Integer userId) {   // получаю из БД список всех событий
+    public List<Event> findUserFeed(Integer userId) {   // получаю из БД список всех событий
         String sqlQuery = "SELECT * FROM events WHERE userId=?";
         List<Event> events = jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);
         return new ArrayList<>(jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId));
