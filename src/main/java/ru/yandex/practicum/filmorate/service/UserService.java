@@ -18,13 +18,13 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class DBUserService {
+public class UserService {
     private final UserDao userDao;
     private final FriendDao friendDao;
     private final EventDao eventDao;
 
     @Autowired
-    public DBUserService(@Qualifier("userDaoImpl") UserDao userDao, FriendDao friendDao, EventDao eventDao) {
+    public UserService(@Qualifier("userDaoImpl") UserDao userDao, FriendDao friendDao, EventDao eventDao) {
         this.userDao = userDao;
         this.friendDao = friendDao;
         this.eventDao = eventDao;
@@ -46,7 +46,7 @@ public class DBUserService {
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        if (getUserFriends(userId).contains(getUser(friendId))) {
+        if (getFriends(userId).contains(getById(friendId))) {
             throw new AlreadyExistException(String.format(
                     "User with ID = %d is ALREADY friends with user with ID = %d", friendId, userId));
         }
@@ -56,7 +56,7 @@ public class DBUserService {
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
-        if (!getUserFriends(userId).contains(getUser(friendId))) {
+        if (!getFriends(userId).contains(getById(friendId))) {
             throw new NotFoundException(
                     String.format("Deleted user with ID = %d was NOT FOUND in friends", friendId));
         }
@@ -65,17 +65,17 @@ public class DBUserService {
         eventDao.add(userId, "FRIEND", "REMOVE", friendId); // удаляю событие из ленты
     }
 
-    public User getUser(Integer id) {
+    public User getById(Integer id) {
         userDao.checkExist(id);
         log.info("Get a user with ID = {}", id);
         return userDao.findById(id);
     }
 
-    public List<User> getUsers() {
+    public List<User> getAll() {
         return userDao.findAll();
     }
 
-    public List<User> getUserFriends(Integer id) {
+    public List<User> getFriends(Integer id) {
         userDao.checkExist(id);
         log.info("Get friends of the user with ID= {}", id);
         return friendDao.findAll(id);
@@ -88,20 +88,20 @@ public class DBUserService {
         return friendDao.findCommon(userId, friendId);
     }
 
-    public void deleteUserById(Integer userId) {
+    public void delete(Integer userId) {
         userDao.checkExist(userId);
         userDao.delete(userId);
         log.info("Delete user from users with ID = {}", userId);
     }
 
-    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
+    public Set<Film> getRecommendedFilms(Integer id, FilmService dbFilmService) {
         userDao.checkExist(id);
-        log.info("Get a RecommendationsFilms for user with ID = {}", id);
+        log.info("Get a recommended films for user with ID = {}", id);
         UserDaoImpl userDaoImpl = (UserDaoImpl) userDao;
         return userDaoImpl.findRecommendationsFilms(id, dbFilmService);
     }
 
-    public List<Event> getEventFeed(Integer userId) {
+    public List<Event> getUserFeed(Integer userId) {
         userDao.checkExist(userId);
         log.info("Get feed of the user with ID= {}", userId);
         return eventDao.findUserFeed(userId);

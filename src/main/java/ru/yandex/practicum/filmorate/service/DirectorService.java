@@ -12,11 +12,11 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class DBDirectorService {
+public class DirectorService {
     private final DirectorDao directorDao;
 
     @Autowired
-    public DBDirectorService(DirectorDao directorDao) {
+    public DirectorService(DirectorDao directorDao) {
         this.directorDao = directorDao;
     }
 

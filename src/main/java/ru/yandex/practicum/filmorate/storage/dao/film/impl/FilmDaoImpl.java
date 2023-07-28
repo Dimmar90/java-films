@@ -88,7 +88,9 @@ public class FilmDaoImpl implements FilmDao {
 
     @Override
     public List<Film> findTop(Integer count, Integer genreId, Integer year) {
-        if (genreId == null & year == null) return findTop(count);
+        if (genreId == null & year == null) {
+            return findTop(count);
+        }
 
         List<String> params = new ArrayList<>();
         if (genreId != null) params.add(String.format("genre_id = %s", genreId));
@@ -131,7 +133,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public boolean checkExist(Integer id) {
+    public boolean checkExist(Integer id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

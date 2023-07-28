@@ -57,13 +57,15 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public List<Review> findAll(Integer filmId, Integer count) {
-        String sqlQuery = "SELECT * FROM reviews %s" +
-                "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+        String sqlQuery;
 
         if (filmId != null) {
-            return jdbcTemplate.query(String.format(sqlQuery, "WHERE film_id = ? "), this::mapRowToReview, filmId, count);
+            sqlQuery = "SELECT * FROM reviews WHERE film_id = ? " +
+                    "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
         } else {
-            return jdbcTemplate.query(String.format(sqlQuery, ""), this::mapRowToReview, count);
+            sqlQuery = "SELECT * FROM reviews GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
         }
     }
 
@@ -73,7 +75,7 @@ public class ReviewDaoImpl implements ReviewDao {
     }
 
     @Override
-    public boolean checkExist(Integer id) {
+    public boolean checkExist(Integer id) throws NotFoundException {
         String sqlQuery = "SELECT review_id FROM reviews WHERE review_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

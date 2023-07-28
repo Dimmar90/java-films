@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.service.DBReviewService;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class ReviewController {
-    private final DBReviewService dbReviewService;
+    private final ReviewService dbReviewService;
 
     @PostMapping
     public Review create(@Valid @RequestBody Review review) {
@@ -29,13 +29,13 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public Review getReview(@PathVariable("reviewId") Integer id) {
-        return dbReviewService.getReview(id);
+        return dbReviewService.getById(id);
     }
 
     @GetMapping // ?filmId={filmId}&count={count}
     public List<Review> getALLReviews(@RequestParam(value = "filmId", required = false) Integer filmId,
                                    @Positive @RequestParam(value = "count", defaultValue = "10") Integer count) {
-        return dbReviewService.getALLReviews(filmId, count);
+        return dbReviewService.getAll(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")
