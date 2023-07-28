@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component()
+@Component
 @RequiredArgsConstructor
 public class DirectorDaoImpl implements DirectorDao {
     private final JdbcTemplate jdbcTemplate;

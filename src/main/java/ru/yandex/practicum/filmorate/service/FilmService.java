@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -19,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class FilmService {
     private final FilmDao filmDao;
@@ -27,17 +27,6 @@ public class FilmService {
     private final FilmLikesDao filmLikesDao;
     private final DirectorDao directorDao;
     private final EventDao eventDao;
-
-    @Autowired
-    public FilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, UserService userService,
-                       GenreDao genreDao, FilmLikesDao filmLikesDao, DirectorDao directorDao, EventDao eventDao) {
-        this.filmDao = filmDao;
-        this.userService = userService;
-        this.genreDao = genreDao;
-        this.filmLikesDao = filmLikesDao;
-        this.directorDao = directorDao;
-        this.eventDao = eventDao;
-    }
 
     public Film create(Film film) {
         Film newFilm = filmDao.create(film);

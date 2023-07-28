@@ -1,34 +1,28 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.user.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 import ru.yandex.practicum.filmorate.storage.dao.user.impl.UserDaoImpl;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class UserService {
     private final UserDao userDao;
     private final FriendDao friendDao;
     private final EventDao eventDao;
-
-    @Autowired
-    public UserService(@Qualifier("userDaoImpl") UserDao userDao, FriendDao friendDao, EventDao eventDao) {
-        this.userDao = userDao;
-        this.friendDao = friendDao;
-        this.eventDao = eventDao;
-    }
 
     public User create(User user) {
         if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());

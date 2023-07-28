@@ -18,7 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-@Component("filmDaoImpl")
+@Component
 @RequiredArgsConstructor
 public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
@@ -82,22 +82,22 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findTop(Integer count) {
-        return jdbcTemplate.query(String.format(getSqlForTopFilms(), ""), this::mapRowToFilm, count);
-    }
-
-    @Override
     public List<Film> findTop(Integer count, Integer genreId, Integer year) {
-        if (genreId == null & year == null) {
-            return findTop(count);
-        }
-
         List<String> params = new ArrayList<>();
+
+        // аргументы genreId, year являются необязательными в запросе, поэтому здесь проверка на null,
+        // от чего будет зависеть итоговый запрос
         if (genreId != null) params.add(String.format("genre_id = %s", genreId));
         if (year != null) params.add(String.format("year(releaseDate) = %s", year));
-        String sqlParams = "WHERE ".concat(String.join(" AND ", params));
 
-        return jdbcTemplate.query(String.format(getSqlForTopFilms(), sqlParams), this::mapRowToFilm, count);
+        String sqlQuery = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genres AS fg ON f.id = fg.film_id %s " +
+                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC LIMIT ?";
+
+        String sqlParams = params.isEmpty() ? "" : "WHERE ".concat(String.join(" AND ", params));
+        return jdbcTemplate.query(String.format(sqlQuery, sqlParams), this::mapRowToFilm, count);
     }
 
     @Override
@@ -228,13 +228,5 @@ public class FilmDaoImpl implements FilmDao {
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
         String keyWordForSql = "%" + keyWord + "%";
         return jdbcTemplate.query(newSql, this::mapRowToFilm, keyWordForSql, keyWordForSql);
-    }
-
-    private String getSqlForTopFilms() {
-        return "SELECT f.*, m.name AS mpa_name FROM films AS f " +
-                "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
-                "LEFT JOIN film_genres AS fg ON f.id = fg.film_id %s " +
-                "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC LIMIT ?";
     }
 }
