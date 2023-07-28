@@ -101,7 +101,7 @@ public class DBFilmService {
         filmDao.checkFilmExist(id);
         Film film = filmDao.getById(id);
         film.setGenres(genreDao.getFilmGenres(film.getId()));
-        directorDao.addDirectorsListToFilm(film);
+        directorDao.addDirectorsToFilm(film);
         log.info("Get a film with ID = {}", id);
         return film;
     }
@@ -110,7 +110,7 @@ public class DBFilmService {
         List<Film> films = new ArrayList<>();
         for (Film film : filmDao.getFilms()) {
             film.setGenres(genreDao.getFilmGenres(film.getId()));
-            directorDao.addDirectorsListToFilm(film);
+            directorDao.addDirectorsToFilm(film);
             films.add(film);
         }
         return films;
@@ -127,7 +127,7 @@ public class DBFilmService {
     }
 
     public List<Film> getSortedListOfFilms(Integer directorsId, List<Film> sortedListOfFilms) {
-        directorDao.checkDirectorExist(directorsId);
+        directorDao.checkExist(directorsId);
         List<Film> directorFilms = new ArrayList<>();
         for (Film film : sortedListOfFilms) {
             film.setGenres(genreDao.getFilmGenres(film.getId()));
@@ -143,15 +143,15 @@ public class DBFilmService {
 
     public void addDirectorsToFilm(Film film) {
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
-            directorDao.deleteDirectorFromFilm(film.getId());
+            directorDao.deleteFromFilm(film.getId());
             film.setDirectors(new HashSet<>());
         } else {
             for (Director director : film.getDirectors()) {
-                if (directorDao.checkDirectorExist(director.getId())) {
-                    directorDao.addDirectorToFilm(director.getId(), film.getId());
+                if (directorDao.checkExist(director.getId())) {
+                    directorDao.addToFilm(director.getId(), film.getId());
                 }
             }
-            directorDao.addDirectorsListToFilm(film);
+            directorDao.addDirectorsToFilm(film);
         }
     }
 

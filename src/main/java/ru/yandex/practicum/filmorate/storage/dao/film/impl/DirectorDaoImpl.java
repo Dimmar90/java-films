@@ -54,7 +54,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Optional<Director> findById(Integer id) {
-        if(checkDirectorExist(id)) {
+        if(checkExist(id)) {
             String sqlQuery = "SELECT * FROM directors WHERE director_id = ?";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id));
         }
@@ -67,19 +67,19 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public void addDirectorToFilm(Integer directorId, Integer filmId) {
+    public void addToFilm(Integer directorId, Integer filmId) {
         String sqlQuery = "INSERT INTO film_directors (director_id,film_id) VALUES (?,?)";
         jdbcTemplate.update(sqlQuery, directorId, filmId);
     }
 
     @Override
-    public void deleteDirectorFromFilm(Integer filmId) {
+    public void deleteFromFilm(Integer filmId) {
         String sqlQuery = "DELETE FROM film_directors WHERE film_id =?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
 
     @Override
-    public void addDirectorsListToFilm(Film film) {
+    public void addDirectorsToFilm(Film film) {
         String sql = "SELECT d.director_id, d.name " +
                 "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.director_id " +
                 "WHERE fd.film_id = ? " +
@@ -89,7 +89,7 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public boolean checkDirectorExist(Integer id) {
+    public boolean checkExist(Integer id) {
         String sqlQuery = "SELECT director_id FROM directors WHERE director_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {

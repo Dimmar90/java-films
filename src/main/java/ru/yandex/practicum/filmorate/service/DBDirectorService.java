@@ -27,7 +27,7 @@ public class DBDirectorService {
     }
 
     public Director update(Director director) {
-        if (director.getId() == null || !directorDao.checkDirectorExist(director.getId())) {
+        if (director.getId() == null || !directorDao.checkExist(director.getId())) {
             throw new NotFoundException("Cannot update director with ID = null");
         }
         log.info("Director {} has been UPDATED", director);
@@ -45,7 +45,7 @@ public class DBDirectorService {
     }
 
     public void deleteDirector(Integer id) {
-        directorDao.checkDirectorExist(id);
+        directorDao.checkExist(id);
         log.info("Deleted director with ID = {}", id);
         directorDao.delete(id);
     }

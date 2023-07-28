@@ -17,11 +17,11 @@ public interface DirectorDao {
 
     void delete(Integer id);
 
-    boolean checkDirectorExist(Integer id);
+    boolean checkExist(Integer id);
 
-    void addDirectorToFilm(Integer directorId, Integer filmId);
+    void addToFilm(Integer directorId, Integer filmId);
 
-    void deleteDirectorFromFilm(Integer filmId);
+    void deleteFromFilm(Integer filmId);
 
-    void addDirectorsListToFilm(Film film);
+    void addDirectorsToFilm(Film film);
 }
