@@ -23,7 +23,7 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public Review create(Review review) {
-        String sqlQuery = "INSERT INTO reviews (content, isPositive, user_id, film_id, useful) VALUES (?,?,?,?,?)";
+        String sqlQuery = "INSERT INTO reviews (content, is_positive, user_id, film_id, useful) VALUES (?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -44,7 +44,7 @@ public class ReviewDaoImpl implements ReviewDao {
     public Review update(Review review) {
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?," +
-                "isPositive = ? " +
+                "is_positive = ? " +
                 "WHERE review_id = ?";
         jdbcTemplate.update(sqlQuery, review.getContent(), review.getIsPositive(), review.getReviewId());
         return findById(review.getReviewId());
@@ -88,7 +88,7 @@ public class ReviewDaoImpl implements ReviewDao {
         return Review.builder()
                 .reviewId(rs.getLong("review_id"))
                 .content(rs.getString("content"))
-                .isPositive(rs.getBoolean("isPositive"))
+                .isPositive(rs.getBoolean("is_positive"))
                 .userId(rs.getLong("user_id"))
                 .filmId(rs.getLong("film_id"))
                 .useful(rs.getInt("useful"))

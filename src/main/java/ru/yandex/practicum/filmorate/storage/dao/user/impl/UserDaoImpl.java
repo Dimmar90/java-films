@@ -75,18 +75,23 @@ public class UserDaoImpl implements UserDao {
     }
 
     public Set<Film> findRecommendationsFilms(Long id, FilmService dbFilmService) {
-        String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
-                "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
-                "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
-                "GROUP BY USER_ID HAVING COUNT(USER_ID)= (SELECT MAX(max) FROM (SELECT USER_ID, COUNT(USER_ID) AS max " +
-                "FROM FILM_LIKES WHERE FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) " +
-                "AND NOT USER_ID=? GROUP BY USER_ID))) " +
-                "AND NOT FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?)";
+        String sqlQuery = "SELECT DISTINCT fl.film_id FROM film_likes fl " +
+                "JOIN (SELECT user_id, COUNT(user_id) AS likes_count FROM film_likes WHERE film_id IN " +
+                         "(SELECT film_id FROM film_likes WHERE user_id = ?) " +
+                     "AND user_id <> ? GROUP BY user_id) " +
+                     "UserLikesCount ON fl.user_id = UserLikesCount.user_id " +
+                "JOIN (SELECT COUNT(user_id) AS max_likes FROM film_likes WHERE film_id IN " +
+                          "(SELECT film_id FROM film_likes WHERE user_id = ?) AND user_id <> ? " +
+                     "GROUP BY user_id ORDER BY COUNT(user_id) DESC LIMIT 1) MaxLikesCount ON ? = ? " +
+                "LEFT JOIN film_likes fl2 ON fl.film_id = fl2.film_id AND fl2.user_id = ? " +
+                "WHERE fl.user_id <> ? " +
+                "AND UserLikesCount.likes_count = MaxLikesCount.max_likes " +
+                "AND fl2.user_id IS NULL";
 
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id, id, id, id);
         Set<Film> recomendatedFilms = new HashSet<>();
         while (rowSet.next()) {
-            Film film = dbFilmService.getById(rowSet.getLong("FILM_ID"));
+            Film film = dbFilmService.getById(rowSet.getLong("film_id"));
             recomendatedFilms.add(film);
         }
         return recomendatedFilms;
