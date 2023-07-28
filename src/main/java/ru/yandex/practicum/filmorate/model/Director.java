@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 public class Director {
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Director name must be completed")
     private String name;
 }

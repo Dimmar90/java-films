@@ -4,23 +4,24 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DirectorDao {
-    Director createDirector(Director director);
+    Director create(Director director);
 
-    Director updateDirector(Director director);
+    Director update(Director director);
 
-    List<Director> findAllDirectors();
+    List<Director> findAll();
 
-    Director findDirectorById(Integer id);
+    Optional<Director> findById(Long id);
 
-    void deleteDirector(Integer id);
+    void delete(Long id);
 
-    boolean checkDirectorExist(Integer id);
+    boolean checkExist(Long id);
 
-    void addFilmToDirector(Integer directorId, Integer filmId);
+    void addToFilm(Long directorId, Long filmId);
 
-    void deleteFilmFromDirector(Integer filmId);
+    void deleteFromFilm(Long filmId);
 
-    void addDirectorsListToFilm(Film film);
+    void addDirectorsToFilm(Film film);
 }

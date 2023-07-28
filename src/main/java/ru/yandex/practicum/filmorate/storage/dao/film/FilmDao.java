@@ -1,22 +1,33 @@
 package ru.yandex.practicum.filmorate.storage.dao.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 
-public interface FilmDao extends FilmStorage {
-    List<Film> getTopFilms(Integer count, Integer genreId, Integer year);
+public interface FilmDao {
 
-    List<Film> getCommonFilms(Integer userId, Integer friendId);
+    Film create(Film film);
 
-    boolean checkFilmExist(Integer id);
+    Film update(Film film);
 
-    List<Film> findDirectorsFilmsSortedByRate(Integer directorId);
 
-    List<Film> findDirectorsFilmsSortedByYears(Integer directorId);
+    List<Film> findAll();
 
-    void deleteFilmById(Integer filmId);
+    Film findById(Long id);
+
+    List<Film> findTop(Integer count);
+
+    List<Film> findTop(Integer count, Integer genreId, Integer year);
+
+    List<Film> findCommon(Long userId, Long friendId);
+
+    boolean checkExist(Long id);
+
+    List<Film> findDirectorsFilmsSortedByRate(Long directorId);
+
+    List<Film> findDirectorsFilmsSortedByYears(Long directorId);
+
+    void delete(Long filmId);
 
     List<Film> search(String keyWord, String whereSearch);
 }

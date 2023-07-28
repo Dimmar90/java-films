@@ -21,12 +21,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class User {
-    private Integer id;
+    private Long id;
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email must be completed")
     private String email;
     @NotBlank(message = "Login must be completed")
     private String login;
+    @NotNull(message = "Name must be completed")
     private String name;
     @NotNull(message = "The birthday can't be empty")
     @PastOrPresent(message = "Birthdate cannot be in the future")

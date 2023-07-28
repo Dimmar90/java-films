@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Event;
 import java.util.List;
 
 public interface EventDao {
-    void addEvent(Integer userId, String eventType, String operation, Integer entityId);
+    void add(Long userId, String eventType, String operation, Long entityId);
 
-    List<Event> getEventFeed(Integer userId);
+    List<Event> findUserFeed(Long userId);
 }

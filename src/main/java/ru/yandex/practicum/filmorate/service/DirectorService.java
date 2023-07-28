@@ -9,43 +9,44 @@ import ru.yandex.practicum.filmorate.storage.dao.film.DirectorDao;
 
 import java.util.List;
 
+
 @Service
 @Slf4j
-public class DBDirectorService {
+public class DirectorService {
     private final DirectorDao directorDao;
 
     @Autowired
-    public DBDirectorService(DirectorDao directorDao) {
+    public DirectorService(DirectorDao directorDao) {
         this.directorDao = directorDao;
     }
 
     public Director create(Director director) {
-        Director newDirector = directorDao.createDirector(director);
+        Director newDirector = directorDao.create(director);
         log.info("{} has been CREATED", director);
         return newDirector;
     }
 
     public Director update(Director director) {
-        if (director.getId() == null || !directorDao.checkDirectorExist(director.getId())) {
+        if (director.getId() == null || !directorDao.checkExist(director.getId())) {
             throw new NotFoundException("Cannot update director with ID = null");
         }
         log.info("Director {} has been UPDATED", director);
-        return directorDao.updateDirector(director);
+        return directorDao.update(director);
     }
 
-    public List<Director> getDirectors() {
-        return directorDao.findAllDirectors();
+    public List<Director> getAll() {
+        return directorDao.findAll();
     }
 
-    public Director getDirector(Integer id) {
-        directorDao.checkDirectorExist(id);
+    public Director getById(Long id) {
         log.info("Get a director with ID = {}", id);
-        return directorDao.findDirectorById(id);
+        return directorDao.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Director ID = %d does not exist", id)));
     }
 
-    public void deleteDirector(Integer id) {
-        directorDao.checkDirectorExist(id);
+    public void deleteDirector(Long id) {
+        directorDao.checkExist(id);
         log.info("Deleted director with ID = {}", id);
-        directorDao.deleteDirector(id);
+        directorDao.delete(id);
     }
 }

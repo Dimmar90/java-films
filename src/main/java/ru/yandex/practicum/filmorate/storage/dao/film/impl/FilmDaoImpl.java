@@ -24,7 +24,7 @@ public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
         String sqlQuery = "INSERT INTO films (name, description, duration, releaseDate, mpa_id) VALUES (?,?,?,?,?)";
         Integer mpaId = film.getMpa().getId();
         KeyHolder id = new GeneratedKeyHolder();
@@ -39,7 +39,7 @@ public class FilmDaoImpl implements FilmDao {
             return ps;
         }, id);
 
-        film.setId(Objects.requireNonNull(id.getKey()).intValue());
+        film.setId(Objects.requireNonNull(id.getKey()).longValue());
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
         film.setMpa(mpa);
@@ -47,7 +47,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         Integer mpaId = film.getMpa().getId();
         String sqlQuery = "UPDATE films SET " +
                 "name = ?," +
@@ -66,29 +66,31 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> getFilms() {
+    public List<Film> findAll() {
         String sqlQuery = "SELECT * FROM films";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     @Override
-    public Film getById(Integer id) {
+    public Film findById(Long id) {
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
-    public void deleteFilmById(Integer filmId) {
+    public void delete(Long filmId) {
         jdbcTemplate.update("DELETE FROM films WHERE id = ?", filmId);
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count) {
+    public List<Film> findTop(Integer count) {
         return jdbcTemplate.query(String.format(getSqlForTopFilms(), ""), this::mapRowToFilm, count);
     }
 
     @Override
-    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
-        if (genreId == null & year == null) return getTopFilms(count);
+    public List<Film> findTop(Integer count, Integer genreId, Integer year) {
+        if (genreId == null & year == null) {
+            return findTop(count);
+        }
 
         List<String> params = new ArrayList<>();
         if (genreId != null) params.add(String.format("genre_id = %s", genreId));
@@ -99,7 +101,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+    public List<Film> findCommon(Long userId, Long friendId) {
         String sqlQuery = "SELECT f.* FROM films f " +
                 "JOIN film_likes fl1 ON fl1.film_id = f.id " +
                 "JOIN film_likes fl2 ON fl2.film_id = f.id " +
@@ -110,7 +112,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findDirectorsFilmsSortedByRate(Integer directorId) {
+    public List<Film> findDirectorsFilmsSortedByRate(Long directorId) {
         String sql = "SELECT f.id, f.name, f.description, f.duration, " +
                 "f.releaseDate, f.mpa_id, COUNT(fl.user_id) AS rate " +
                 "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
@@ -122,7 +124,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public List<Film> findDirectorsFilmsSortedByYears(Integer directorId) {
+    public List<Film> findDirectorsFilmsSortedByYears(Long directorId) {
         String sql = "SELECT f.id, f.name, f.description, f.duration, f.releaseDate, f.mpa_id " +
                 "FROM film_directors fd LEFT JOIN films f ON fd.film_id = f.id " +
                 "WHERE fd.director_id =? " +
@@ -131,7 +133,7 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
-    public boolean checkFilmExist(Integer id) {
+    public boolean checkExist(Long id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM films WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -144,15 +146,15 @@ public class FilmDaoImpl implements FilmDao {
         int mpaId = rs.getInt("mpa_id");
         String mpaName = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
         Mpa mpa = jdbcTemplate.queryForObject(mpaName, this::mapRowToMpa, mpaId);
-        int filmId = rs.getInt("id");
+        Long filmId = rs.getLong("id");
         String sql = "SELECT genre_id, name FROM genres WHERE genre_id IN" +
                 "(SELECT genre_id FROM film_genres WHERE film_id = ?)";
         Set<Genre> genres = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
 
-        String directorSql = "SELECT d.DIRECTOR_ID, d.NAME \n" +
-                "FROM FILM_DIRECTORS fd LEFT JOIN DIRECTORS d ON FD.DIRECTOR_ID = d.DIRECTOR_ID \n" +
-                "WHERE FD .FILM_ID =?\n" +
-                "ORDER BY d.DIRECTOR_ID ";
+        String directorSql = "SELECT d.id, d.NAME \n" +
+                "FROM film_directors fd LEFT JOIN directors d ON fd.director_id = d.id \n" +
+                "WHERE fd.film_id = ?\n" +
+                "ORDER BY d.id ";
         Set<Director> directors = new HashSet<>(jdbcTemplate.query(directorSql, this::mapRowToDirector, filmId));
 
         return Film.builder()
@@ -176,19 +178,19 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
-        return new Director(rs.getInt("director_id"), rs.getString("name"));
+        return new Director(rs.getLong("id"), rs.getString("name"));
     }
 
     @Override
     public List<Film> search(String keyWord, String whereSearch) {
         String[] s = whereSearch.split(",");
         if (s.length == 2) {
-            return searchByDirAndTitle(keyWord);
+            return searchByDirectorAndName(keyWord);
         } else {
             if (s[0].equals("director")) {
                 return searchByDirector(keyWord);
             } else {
-                return searchByTitle(keyWord);
+                return searchByName(keyWord);
             }
         }
     }
@@ -198,14 +200,14 @@ public class FilmDaoImpl implements FilmDao {
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
                 "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
-                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.id " +
                 "WHERE lower(d.name) LIKE lower(?)" +
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";
         String keyWordForSql = "%" + keyWord + "%";
         return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
     }
 
-    private List<Film> searchByTitle(String keyWord) {
+    private List<Film> searchByName(String keyWord) {
         String newSql = "SELECT f.*, m.name AS mpa_name FROM films AS f " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
@@ -215,12 +217,12 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.query(newSql, new Object[]{keyWordForSql}, this::mapRowToFilm);
     }
 
-    private List<Film> searchByDirAndTitle(String keyWord) {
+    private List<Film> searchByDirectorAndName(String keyWord) {
         String newSql = "SELECT f.*, m.name AS mpa_name, d.name FROM films AS f " +
                 "LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
                 "LEFT JOIN film_directors AS fd on f.id = fd.film_id " +
-                "LEFT JOIN directors AS d on fd.director_id = d.director_id " +
+                "LEFT JOIN directors AS d on fd.director_id = d.id " +
                 "WHERE lower(f.name) LIKE lower(?) or " +
                 "lower(d.name) LIKE lower(?) " +
                 "GROUP BY f.id ORDER BY COUNT(lk.user_id) DESC";

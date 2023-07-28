@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.DBFilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
 import java.sql.PreparedStatement;
@@ -28,7 +28,7 @@ public class UserDaoImpl implements UserDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         String sqlQuery = "INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -40,12 +40,12 @@ public class UserDaoImpl implements UserDao {
             return ps;
         }, keyHolder);
 
-        user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         String sqlQuery = "UPDATE users SET " +
                 "email = ?," +
                 "login = ?," +
@@ -58,42 +58,47 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<User> findAll() {
         String sqlQuery = "SELECT * FROM users";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     @Override
-    public User getById(Integer id) {
+    public User findById(Long id) {
         String sqlQuery = "SELECT * FROM users WHERE id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
     }
 
     @Override
-    public void deleteUserById(Integer userId) {
+    public void delete(Long userId) {
         jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
     }
 
-    public Set<Film> getRecommendationsFilms(Integer id, DBFilmService dbFilmService) {
-        String sqlQuery = "SELECT FILM_ID FROM FILM_LIKES " +
-                "WHERE USER_ID IN (SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID IN " +
-                "(SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) AND NOT USER_ID=? " +
-                "GROUP BY USER_ID HAVING COUNT(USER_ID)= (SELECT MAX(max) FROM (SELECT USER_ID, COUNT(USER_ID) AS max " +
-                "FROM FILM_LIKES WHERE FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?) " +
-                "AND NOT USER_ID=? GROUP BY USER_ID))) " +
-                "AND NOT FILM_ID IN (SELECT u.FILM_ID FROM FILM_LIKES u WHERE u.USER_ID = ?)";
+    public Set<Film> findRecommendationsFilms(Long id, FilmService dbFilmService) {
+        String sqlQuery = "SELECT DISTINCT fl.film_id FROM film_likes fl " +
+                "JOIN (SELECT user_id, COUNT(user_id) AS likes_count FROM film_likes WHERE film_id IN " +
+                         "(SELECT film_id FROM film_likes WHERE user_id = ?) " +
+                     "AND user_id <> ? GROUP BY user_id) " +
+                     "UserLikesCount ON fl.user_id = UserLikesCount.user_id " +
+                "JOIN (SELECT COUNT(user_id) AS max_likes FROM film_likes WHERE film_id IN " +
+                          "(SELECT film_id FROM film_likes WHERE user_id = ?) AND user_id <> ? " +
+                     "GROUP BY user_id ORDER BY COUNT(user_id) DESC LIMIT 1) MaxLikesCount ON ? = ? " +
+                "LEFT JOIN film_likes fl2 ON fl.film_id = fl2.film_id AND fl2.user_id = ? " +
+                "WHERE fl.user_id <> ? " +
+                "AND UserLikesCount.likes_count = MaxLikesCount.max_likes " +
+                "AND fl2.user_id IS NULL";
 
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id, id, id, id, id, id, id, id);
         Set<Film> recomendatedFilms = new HashSet<>();
         while (rowSet.next()) {
-            Film film = dbFilmService.getFilm(rowSet.getInt("FILM_ID"));
+            Film film = dbFilmService.getById(rowSet.getLong("film_id"));
             recomendatedFilms.add(film);
         }
         return recomendatedFilms;
     }
 
     @Override
-    public boolean checkUserExist(Integer id) {
+    public boolean checkExist(Long id) throws NotFoundException {
         String sqlQuery = "SELECT id FROM users WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
@@ -104,7 +109,7 @@ public class UserDaoImpl implements UserDao {
 
     private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         return User.builder()
-                .id(rs.getInt("id"))
+                .id(rs.getLong("id"))
                 .email(rs.getString("email"))
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))

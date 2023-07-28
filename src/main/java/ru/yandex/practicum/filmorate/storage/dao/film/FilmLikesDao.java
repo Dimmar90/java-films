@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.dao.film;
 
 public interface FilmLikesDao {
-    void like(Integer id, Integer userId);
+    void like(Long id, Long userId);
 
-    void unlike(Integer id, Integer userId);
+    void unlike(Long id, Long userId);
 }

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.dao.review;
 
 public interface ReviewLikeDao {
-    void setLike(Integer id, Integer userId);
+    void add(Long id, Long userId);
 
-    void deleteLike(Integer id, Integer userId);
+    void delete(Long id, Long userId);
 }

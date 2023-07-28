@@ -12,16 +12,16 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DBMpaService {
+public class MpaService {
     private final MpaDao mpaDao;
 
-    public Mpa getMpa(Integer id) throws NotFoundException {
+    public Mpa getById(Integer id) throws NotFoundException {
         log.info("Get a MPA with ID = {}", id);
-        return mpaDao.getMpa(id);
+        return mpaDao.findById(id);
     }
 
-    public List<Mpa> getAllMpa() {
+    public List<Mpa> getAll() {
         log.info("Get all MPA");
-        return mpaDao.getAllMpa();
+        return mpaDao.findAll();
     }
 }

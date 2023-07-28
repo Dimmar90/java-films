@@ -23,20 +23,20 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public Review create(Review review) {
-        String sqlQuery = "INSERT INTO reviews (content, isPositive, user_id, film_id, useful) VALUES (?,?,?,?,?)";
+        String sqlQuery = "INSERT INTO reviews (content, is_positive, user_id, film_id, useful) VALUES (?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"review_id"});
+            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"id"});
             ps.setString(1, review.getContent());
             ps.setBoolean(2, review.getIsPositive());
-            ps.setInt(3, review.getUserId());
-            ps.setInt(4, review.getFilmId());
+            ps.setLong(3, review.getUserId());
+            ps.setLong(4, review.getFilmId());
             ps.setInt(5, 0);
             return ps;
         }, keyHolder);
 
-        review.setReviewId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        review.setReviewId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return review;
     }
 
@@ -44,37 +44,39 @@ public class ReviewDaoImpl implements ReviewDao {
     public Review update(Review review) {
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?," +
-                "isPositive = ? " +
-                "WHERE review_id = ?";
+                "is_positive = ? " +
+                "WHERE id = ?";
         jdbcTemplate.update(sqlQuery, review.getContent(), review.getIsPositive(), review.getReviewId());
-        return getById(review.getReviewId());
+        return findById(review.getReviewId());
     }
 
     @Override
-    public Review getById(Integer id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM reviews WHERE review_id = ?", this::mapRowToReview, id);
+    public Review findById(Long id) {
+        return jdbcTemplate.queryForObject("SELECT * FROM reviews WHERE id = ?", this::mapRowToReview, id);
     }
 
     @Override
-    public List<Review> getAllReviews(Integer filmId, Integer count) {
-        String sqlQuery = "SELECT * FROM reviews %s" +
-                "GROUP BY review_id ORDER BY useful DESC LIMIT ?";
+    public List<Review> findAll(Long filmId, Integer count) {
+        String sqlQuery;
 
         if (filmId != null) {
-            return jdbcTemplate.query(String.format(sqlQuery, "WHERE film_id = ? "), this::mapRowToReview, filmId, count);
+            sqlQuery = "SELECT * FROM reviews WHERE film_id = ? " +
+                    "GROUP BY id ORDER BY useful DESC LIMIT ?";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
         } else {
-            return jdbcTemplate.query(String.format(sqlQuery, ""), this::mapRowToReview, count);
+            sqlQuery = "SELECT * FROM reviews GROUP BY id ORDER BY useful DESC LIMIT ?";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
         }
     }
 
     @Override
-    public void deleteById(Integer id) {
-        jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", id);
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE FROM reviews WHERE id = ?", id);
     }
 
     @Override
-    public boolean checkReviewExist(Integer id) {
-        String sqlQuery = "SELECT review_id FROM reviews WHERE review_id = ?";
+    public boolean checkExist(Long id) throws NotFoundException {
+        String sqlQuery = "SELECT id FROM reviews WHERE id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!rowSet.next()) {
             throw new NotFoundException(String.format("Review ID = %d does not exist", id));
@@ -84,11 +86,11 @@ public class ReviewDaoImpl implements ReviewDao {
 
     private Review mapRowToReview(ResultSet rs, int rowNum) throws SQLException {
         return Review.builder()
-                .reviewId(rs.getInt("review_id"))
+                .reviewId(rs.getLong("id"))
                 .content(rs.getString("content"))
-                .isPositive(rs.getBoolean("isPositive"))
-                .userId(rs.getInt("user_id"))
-                .filmId(rs.getInt("film_id"))
+                .isPositive(rs.getBoolean("is_positive"))
+                .userId(rs.getLong("user_id"))
+                .filmId(rs.getLong("film_id"))
                 .useful(rs.getInt("useful"))
                 .build();
     }
