@@ -54,7 +54,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Optional<Director> findById(Long id) {
-        if(checkExist(id)) {
+        if (checkExist(id)) {
             String sqlQuery = "SELECT * FROM directors WHERE id = ?";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id));
         }
