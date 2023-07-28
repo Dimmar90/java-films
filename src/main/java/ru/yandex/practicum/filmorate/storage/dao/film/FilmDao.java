@@ -10,12 +10,9 @@ public interface FilmDao {
 
     Film update(Film film);
 
-
     List<Film> findAll();
 
     Film findById(Long id);
-
-    List<Film> findTop(Integer count);
 
     List<Film> findTop(Integer count, Integer genreId, Integer year);
 

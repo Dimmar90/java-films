@@ -146,7 +146,7 @@ class FilmDaoImplTest {
 
         likesStorage.like(film2.getId(), user.getId());
         List<Film> topFilms = List.of(film2, film1);
-        assertEquals(topFilms, filmStorage.findTop(2));
+        assertEquals(topFilms, filmStorage.findTop(2, null, null));
     }
 
     @Test
